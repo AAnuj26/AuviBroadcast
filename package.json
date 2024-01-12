@@ -2,15 +2,20 @@
   "name": "auvibroadcast",
   "version": "1.0.0",
   "description": "a backend for video streaming app",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
     "javascript",
     "backend",
     "auvibroadcast"
   ],
-  "author": "anuj bhagat",
-  "license": "ISC"
+  "author": "Anuj Bhagat",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "prettier": "^3.2.0"
+  }
 }
