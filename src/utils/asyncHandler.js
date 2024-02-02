@@ -1,4 +1,5 @@
 // asyncHandler WITH try and catch ->
+
 const asyncHandler = (requestHandler) => async (req, res, next) => {
   try {
     await requestHandler(req, res, next);
@@ -10,11 +11,12 @@ const asyncHandler = (requestHandler) => async (req, res, next) => {
   }
 };
 
-// asyncHandler WITH promise ->
-//   const asyncHandler = (requestHandler) => {
-//     (req, res, next) => {
-//       Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
-//     };
+// // asyncHandler WITH promise ->
+
+// const asyncHandler = (requestHandler) => {
+//   return (req, res, next) => {
+//     Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
 //   };
+// };
 
 export { asyncHandler };
