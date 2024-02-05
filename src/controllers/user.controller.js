@@ -6,23 +6,16 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
-  // validation - not empty
-  // check if user already exists: username, email
-  // check for image, check for avatar
-  // upload them to cloudinary, check if avatar is uploaded
-  // create user object - create enter in db
-  // remove password and refresh token from response
-  // check for user creation
-  // send back response
-
   const { fullName, email, username, password } = req.body;
 
+  // validation - not empty
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All fields are required");
   }
 
+  // check if user already exists: username, email
   const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
@@ -31,42 +24,47 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User already exists");
   }
 
+  // check for image, check for avatar
   const avatarLocalPath = req.files?.avatar?.[0]?.path;
+
   const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
+  //check if avatar file path is available
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar is required");
   }
-  if (!coverImageLocalPath) {
-    console.log(req.files?.coverImage?.[0]?.path);
-    throw new ApiError(400, "Cover image is required");
-  }
 
+  // upload them to cloudinary
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
+  //check if avatar is uploaded
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");
   }
 
+  // create user object - create enter in db
   const user = await User.create({
     fullName,
     avatar: avatar.url,
-    coverImage: coverImage.url || "",
+    coverImage: coverImage?.url || "",
     email,
     password,
-    username: username.toLowerCase(),
+    username: username,
   });
 
+  // remove password and refresh token from response
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
+  // check for user creation
   if (!createdUser) {
     throw new ApiError(500, "User not created");
   }
 
+  // send back response
   return res
     .status(201)
     .json(new ApiResponse(201, createdUser, "User created successfully"));
