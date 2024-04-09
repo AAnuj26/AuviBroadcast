@@ -121,4 +121,22 @@ const publishAVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, newVideo, "Video published successfully"));
 });
 
-export { getAllVideos, publishAVideo };
+const getVideoById = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  // Get video by ID
+  const video = await Video.findById(videoId);
+
+  if (
+    !video ||
+    (!video?.isPublished &&
+      !(video?.owner.toString() === req.user?._id.toString()))
+  ) {
+    throw new ApiError(404, "Video not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video fetched successfully"));
+});
+
+export { getAllVideos, publishAVideo, getVideoById };
