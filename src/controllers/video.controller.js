@@ -3,6 +3,8 @@ import { Video } from "../models/video.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import fs from "fs";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -75,4 +77,48 @@ const getAllVideos = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, Videos, "Videos fetched successfully"));
 });
 
-export { getAllVideos };
+const publishAVideo = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+  // TODO: get video, upload to cloudinary, create video
+  if (!title || !description) {
+    throw new ApiError(400, "Title and description are required");
+  }
+
+  // Retrieve the video and thumbnail
+  const videoLocalPath = req.files?.videoFile[0]?.path;
+  const thumbnailLocalPath = req.files?.thumbnailFile[0]?.path;
+  if (!videoLocalPath) {
+    throw new ApiError(400, "Video is required");
+  }
+  if (!thumbnailLocalPath) {
+    throw new ApiError(400, "Thumbnail is required");
+  }
+  // Cloud
+  const video = await uploadOnCloudinary(videoLocalPath);
+  const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+  if (!video?.url) {
+    throw new ApiError(500, "Failed to upload video");
+  }
+  if (!thumbnail?.url) {
+    throw new ApiError(500, "Failed to upload thumbnail");
+  }
+  fs.unlinkSync(videoLocalPath);
+  fs.unlinkSync(thumbnailLocalPath);
+
+  const newVideo = await Video.create({
+    videoFile: video?.url,
+    thumbnail: thumbnail?.url,
+    title,
+    description,
+    duration: video?.duration,
+    isPublished: true,
+    owner: req.user?._id,
+  });
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newVideo, "Video published successfully"));
+});
+
+export { getAllVideos, publishAVideo };
