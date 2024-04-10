@@ -6,6 +6,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 
+const isUserOwnser = async (videoId, req) => {
+  const video = await Video.findById(videoId);
+  if (video?.owner.toString() !== req.user?._id.toString()) {
+    return false;
+  }
+  return true;
+};
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
@@ -139,4 +146,54 @@ const getVideoById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, video, "Video fetched successfully"));
 });
 
-export { getAllVideos, publishAVideo, getVideoById };
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!videoId) {
+    throw new ApiError(400, "Video ID is required");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video Doesnt Exist");
+  }
+
+  const authorized = await isUserOwnser(videoId, req);
+  if (!authorized) {
+    throw new ApiError(403, "Unauthorized Access");
+  }
+
+  const { title, description } = req.body;
+  if (!title && !description) {
+    throw new ApiError(400, "Title and description are required");
+  }
+  const thumbnailLocalPath = req.file?.path;
+
+  const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+  if (!thumbnail?.url) {
+    throw new ApiError(500, "Failed to upload thumbnail");
+  }
+  fs.unlinkSync(thumbnailLocalPath);
+  const updatedVideo = await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $set: {
+        title: title,
+        description: description,
+        thumbnail: thumbnail?.url,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  if (!updateVideo) {
+    throw new ApiError(500, "Failed to update video");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedVideo, "Video updated successfully"));
+});
+
+export { getAllVideos, publishAVideo, getVideoById, updateVideo };
