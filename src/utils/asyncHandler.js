@@ -5,9 +5,9 @@ const asyncHandler = (requestHandler) => async (req, res, next) => {
     const response = await requestHandler(req, res, next);
     return response;
   } catch (error) {
-    res.status(error.code).json({
+    res.status(error.statusCode || 500).json({
       sucess: false,
-      message: error.message || "Internal Server Error",
+      message: error.message || "Server Error at asyncHandler",
     });
   }
 };
