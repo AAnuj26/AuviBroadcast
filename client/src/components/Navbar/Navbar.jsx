@@ -11,7 +11,7 @@ const Navbar = () => {
   return (
     <>
       <nav className={Styles.Navbar}>
-        <div className={Styles.firstDiv}>
+        <header className={Styles.firstDiv}>
           <button>
             <img src={menu} alt="menu" />
           </button>
@@ -21,7 +21,7 @@ const Navbar = () => {
               Auvi <sup>IN</sup>
             </h1>
           </span>
-        </div>
+        </header>
 
         <div className={Styles.searchElements}>
           <SearchBar />

@@ -2,6 +2,7 @@
   display: flex;
   div {
     display: flex;
+    width: 100%;
     .SearchIconInsideInput {
       width: 20px;
       display: none;
@@ -11,6 +12,8 @@
     }
     input {
       width: 100%;
+      font-size: 1rem;
+      font-weight: 400;
       color: white;
       box-shadow: inset 0 0 0.5px 0.5px rgba(120, 118, 118, 0.5);
       border: 0px;
@@ -25,7 +28,7 @@
       outline-offset: 0.1px;
       &:active,
       &:focus {
-        box-shadow: inset 0 0 0 0.3px blue;
+        box-shadow: inset 0 0 0 0.3px rgb(62, 166, 255);
         outline: none;
         padding-left: 2rem;
       }
@@ -36,6 +39,11 @@
     }
     &:focus-within > .SearchIconInsideInput {
       display: inline-block;
+    }
+    input::placeholder {
+      // color: white;
+      font-size: 1rem;
+      font-weight: 500;
     }
   }
   > button {

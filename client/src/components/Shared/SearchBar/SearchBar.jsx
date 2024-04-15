@@ -3,7 +3,7 @@ import searchIcon from "../../../assets/search.svg";
 const SearchBar = () => {
   return (
     <>
-      <div className={Styles.SearchBar}>
+      <form className={Styles.SearchBar}>
         <div>
           <img
             className={Styles.SearchIconInsideInput}
@@ -16,7 +16,7 @@ const SearchBar = () => {
         <button>
           <img src={searchIcon} alt="searchIcon" />
         </button>
-      </div>
+      </form>
     </>
   );
 };

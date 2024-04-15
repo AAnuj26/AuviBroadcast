@@ -1,34 +1,43 @@
-@use "../../index.scss";
+@import "../../index.scss";
 
 .Navbar {
   display: flex;
-  flex-direction: row;
+  // flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 5dvh;
+  height: 35px;
   margin-top: 0.75rem;
+  width: 100%;
+  // background-color: $primary-color;
 
   /* ------------------------------------- */
   // display: grid;
   // // grid-template-rows: 1fr;
   // grid-template-columns: repeat(12, 1fr);
-  // height: 5dvh;
+  // height: 20px;
   // margin-top: 0.75rem;
-  > div.firstDiv {
+
+  > header.firstDiv {
     display: flex;
     // grid-column: span 3;
+    // grid-column: span 3 / span 3;
     align-items: center;
     height: auto;
+    width: 25%;
     // margin-top: auto;
     > button {
       height: auto;
       background-color: transparent;
       border: none;
-      // padding: 5px 10px;
+      border-radius: 999px;
+      padding: 5px 8px;
       // padding-top: 5px;
       align-items: center;
       > img {
         height: 30px;
+      }
+      &:hover {
+        background-color: #27272a;
       }
     }
     > span {
@@ -58,8 +67,12 @@
   > div.searchElements {
     display: flex;
     align-items: center;
-    // grid-column: span 6;
+    // grid-column: span 6 / span 6;
     height: auto;
+    width: 40%;
+    > form {
+      width: 100%;
+    }
     > div.se1 > button {
       border: none;
       display: flex;
@@ -84,9 +97,13 @@
   }
   > div.lastDiv {
     display: flex;
+    width: 25%;
     // grid-column: span 3;
+
+    // grid-column: span 3 / span 3;
+    justify-content: flex-end;
     align-items: center;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
     > div > button {
       display: flex;
       height: 40px;
@@ -102,6 +119,7 @@
         justify-content: center;
         height: 25px;
       }
+
       &:hover {
         background-color: #27272a;
       }
