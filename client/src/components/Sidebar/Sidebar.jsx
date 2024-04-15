@@ -9,18 +9,7 @@ const Main = () => {
   return (
     <>
       <aside className={Styles.Sidebar}>
-        <header className={Styles.firstDiv}>
-          <button>
-            <img src={menu} alt="menu" />
-          </button>
-          <span>
-            <img src={logo} alt="auvilogo" />
-            <h1>
-              Auvi <sup>IN</sup>
-            </h1>
-          </span>
-        </header>
-        <main>
+        {/* <main>
           <div>
             <button>Home</button>
           </div>
@@ -117,7 +106,136 @@ const Main = () => {
               </li>
             </ul>
           </footer>
-        </main>
+        </main> */}
+        <header className={Styles.firstDiv}>
+          <button>
+            <img src={menu} alt="menu" />
+          </button>
+          <span>
+            <img src={logo} alt="auvilogo" />
+            <h1>
+              Auvi <sup>IN</sup>
+            </h1>
+          </span>
+        </header>
+        <div>
+          <main className={Styles.SideBarMain}>
+            <div>
+              <button>Hello</button>
+            </div>
+            <div>
+              <button>Hello</button>
+            </div>
+            <div>
+              <button>Hello</button>
+            </div>
+            <div>
+              <button>Hello</button>
+            </div>
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>{" "}
+            <div>
+              <button>Hello</button>
+            </div>
+          </main>
+          <footer className={Styles.SideBarFooter}>
+            <div>
+              <a href="#">About</a>
+              <a href="#">About</a>
+              <a href="#">About</a>
+              <a href="#">About</a>
+              <a href="#">About</a>
+              <a href="#">About</a>
+              <a href="#">About</a>
+            </div>
+            <div>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+            </div>
+            <div>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+            </div>{" "}
+            <div>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+              <a href="#">Privacy</a>
+            </div>
+            <p>C 2024 Google LLC</p>
+          </footer>
+        </div>
       </aside>
     </>
   );
