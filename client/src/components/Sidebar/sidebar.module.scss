@@ -1,27 +1,19 @@
+@import "../../index.scss";
 .Sidebar {
   display: flex;
   flex-direction: column;
   width: 240px;
-  background-color: lightskyblue;
+  background-color: #282828;
   height: 100vh;
   position: fixed;
-
-  //   align-items: flex-start;
-  //   justify-content: flex-start;
-  //   align-items: flex-start;
+  transition: transform 0.3s ease;
   > header.firstDiv {
-    background-color: red;
+    background-color: transparent;
     display: flex;
     justify-content: flex-start;
-    // position: fixed;
-    // grid-column: span 3;
-    // grid-column: span 3 / span 3;
-    // margin-left: 0.75rem;
-    // margin-top: 0.25rem;
     align-items: center;
     height: 40px;
     width: auto;
-    // margin-top: auto;
     > button {
       height: auto;
       background-color: transparent;
@@ -62,92 +54,108 @@
     }
   }
   > div {
-    overflow-x: auto;
+    margin-top: 0.5rem;
+    overflow-y: hidden;
+    background-color: transparent;
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-button:start {
+      display: block;
+      height: 4px;
+      background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #888;
+    }
+    &::-webkit-scrollbar-button:end {
+      display: block;
+      height: 4px;
+      background-color: transparent;
+      // color: white;
+    }
+    &:hover {
+      overflow-y: auto;
+    }
 
     > main.SideBarMain {
       background-color: green;
       height: auto;
+      > div {
+        display: flex;
+        width: 232px;
+        // height: 100%;
+        background-color: red;
+        justify-content: center;
+        > button {
+          // position: relative;
+
+          background-color: transparent;
+          margin: 0.2rem 0.75rem;
+          padding: 5px;
+          display: flex;
+          justify-content: flex-start;
+          border: none;
+          border-radius: 15px;
+          // height: 40px;
+          width: 100%;
+          &:hover {
+            background-color: #888;
+          }
+          > div:nth-child(1) {
+            width: 20%;
+            height: auto;
+            display: flex;
+            margin-right: 0.5rem;
+            img {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 32px;
+            }
+          }
+          > div:nth-child(2) {
+            height: 100%;
+            width: 80%;
+            display: flex;
+            margin-left: 0.5rem;
+            // background-color: aqua;
+            span {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              // padding-left: 15px;
+            }
+          }
+        }
+      }
     }
     > footer.SideBarFooter {
       display: flex;
-      background-color: blue;
+      // background-color: blue;
       flex-direction: column;
       height: auto;
 
       > div {
         height: auto;
-        width: auto;
+        width: 232px;
+
         display: flex;
         flex-wrap: wrap;
         margin-bottom: 0.75rem;
+        margin-top: 0.75rem;
+        a {
+          padding: 5px;
+        }
       }
     }
   }
 
-  // > main {
-  //   padding-left: 15px;
-  //   list-style: none;
-  //   list-style-position: outside;
-  //   // display: flex;
-  //   // flex-direction: column;
-  //   // justify-content: flex-start;
-  //   // align-items: flex-start;
-  //   // padding-right: 10px;
-  //   width: 200px;
-  //   height: 100vh;
-  //   overflow-y: scroll;
-  //   overflow-x: hidden;
-  //   > div {
-  //     height: 40px;
-  //     margin-bottom: 3px;
-  //     width: 91%;
-  //     //   padding-right: 18px;
-
-  //     //   list-style: none;
-  //     //   background-color: black;
-  //     > button {
-  //       border: none;
-  //       border-radius: 5px;
-  //       height: 100%;
-  //       width: 100%;
-  //     }
-  //   }
-  //   > hr {
-  //     margin: 0.7rem 0;
-  //   }
-  //   > footer {
-  //     > ul {
-  //       display: flex;
-  //       flex-wrap: wrap;
-  //       padding-left: 15px;
-  //       list-style: none;
-  //       list-style-position: outside;
-  //       // display: flex;
-  //       // flex-direction: column;
-  //       // justify-content: flex-start;
-  //       // align-items: flex-start;
-  //       // padding-right: 10px;
-  //       width: 200px;
-  //       height: auto;
-  //       overflow-y: scroll;
-  //       overflow-x: hidden;
-  //       > li {
-  //         display: flex;
-  //         height: 40px;
-  //         margin-bottom: 3px;
-  //         width: 91%;
-
-  //         //   padding-right: 18px;
-
-  //         //   list-style: none;
-  //         //   background-color: black;
-  //         > a {
-  //           display: flex;
-  //           height: auto;
-  //           width: auto;
-  //         }
-  //       }
-  //     }
-  //   }
+  // > div::-webkit-scrollbar {
+  //   width: 8px; /* width of the scrollbar */
+  // }
+  // > div::-webkit-scrollbar-thumb {
+  //   background-color: #888; /* Color of the scrollbar handle */
   // }
 }
