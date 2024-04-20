@@ -78,3 +78,39 @@ const getVideoComments = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, comments, "Comments obtained successfully"));
 });
+
+const addComment = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const { commentContent } = req.body;
+  if (!videoId) {
+    throw new ApiError(400, "Video ID is required");
+  }
+  try {
+    const video = await Video.findById(videoId);
+    if (
+      !video ||
+      (video.owner.toString() !== req.user?._id.toString() &&
+        !video.isPublished)
+    ) {
+      throw new ApiError(400, "There is no such Video");
+    }
+    if (!commentContent) {
+      throw new ApiError(400, "commentContent is required!!");
+    }
+    const comment = await Comment.create({
+      content: commentContent,
+      video: videoId,
+      owner: req.user?._id,
+    });
+    if (!comment) {
+      throw new ApiError(500, "Unable to create comment");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, comment, "comment posted successfully"));
+  } catch (e) {
+    throw new ApiError(500, e?.message || "Unable to create comment");
+  }
+});
+
+export { getVideoComments, addComment };
