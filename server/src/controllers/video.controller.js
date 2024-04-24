@@ -210,6 +210,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Unauthorized Access");
   }
   const videoDeleted = await Video.findByIdAndDelete(videoId);
+
+  await Comment.deleteMany({ video: videoId });
+
   if (!videoDeleted) {
     throw new ApiError(500, "Failed to delete video");
   }
