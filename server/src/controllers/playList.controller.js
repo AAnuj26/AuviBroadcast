@@ -115,15 +115,15 @@ const getUserPlayLists = asyncHandler(async (req, res) => {
 });
 
 const getPlayListById = asyncHandler(async (req, res) => {
-  const { playlistId } = req.params;
-  if (!playlistId) {
+  const { playListId } = req.params;
+  if (!playListId) {
     throw new ApiError(400, "Playlist ID is required");
   }
   try {
     const playList = await Playlist.aggregate([
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(playlistId),
+          _id: new mongoose.Types.ObjectId(playListId),
         },
       },
       {
@@ -174,11 +174,11 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
   const { playListId, videoId } = req.params;
 
   if (!playListId || !videoId) {
-    throw new ApiError(400, "Playlist ID and Video ID both required");
+    throw new ApiError(400, "PlaylistId and videoId both required!!");
   }
 
   try {
-    const userOwner = await isUserOwnerofPlaylist(playlistId, req?.user?._id);
+    const userOwner = await isUserOwnerofPlaylist(playListId, req?.user?._id);
     if (!userOwner) {
       throw new ApiError(300, "Unauthorized Access");
     }
@@ -192,7 +192,7 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Video Not Found");
     }
     //check if the video is already added to playlist or not
-    const playlist = await Playlist.findById(playlistId);
+    const playlist = await Playlist.findById(playListId);
     if (playlist.videos.includes(videoId)) {
       return res
         .status(200)
@@ -202,7 +202,7 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
     }
     const addedplaylist = await Playlist.updateOne(
       {
-        _id: new mongoose.Types.ObjectId(playlistId),
+        _id: new mongoose.Types.ObjectId(playListId),
       },
       {
         $push: { videos: videoId },
@@ -247,7 +247,7 @@ const removeVideoFromPlayList = asyncHandler(async (req, res) => {
     }
 
     //check video is added in playlist or not
-    const playlist = await Playlist.findById(playlistId);
+    const playlist = await Playlist.findById(playListId);
     if (!playlist.videos.includes(videoId)) {
       throw new ApiError(404, "No Video Found in Playlist");
     }
@@ -255,7 +255,7 @@ const removeVideoFromPlayList = asyncHandler(async (req, res) => {
     if (!video?.isPublished) {
       const removedVideoFromPlaylist = await Playlist.updateOne(
         {
-          _id: new mongoose.Types.ObjectId(playlistId),
+          _id: new mongoose.Types.ObjectId(playListId),
         },
         {
           $pull: { videos: videoId },
@@ -270,7 +270,7 @@ const removeVideoFromPlayList = asyncHandler(async (req, res) => {
     }
     const removedVideoFromPlaylist = await Playlist.updateOne(
       {
-        _id: new mongoose.Types.ObjectId(playlistId),
+        _id: new mongoose.Types.ObjectId(playListId),
       },
       {
         $pull: { videos: videoId },
