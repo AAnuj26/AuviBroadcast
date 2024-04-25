@@ -4,6 +4,25 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
+import { Video } from "../models/video.model.js";
+
+const isUserOwnerofPlaylist = async (playlistId, userId) => {
+  try {
+    const playlist = await Playlist.findById(playlistId);
+
+    if (!playlist) {
+      throw new ApiError(400, "playlist doesn't exist");
+    }
+
+    if (playlist?.owner.toString() !== userId.toString()) {
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    throw new ApiError(400, e.message || "Playlist Not Found");
+  }
+};
 
 const createPlayList = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
@@ -210,14 +229,14 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
   }
 });
 
-const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
-  const { playlistId, videoId } = req.params;
+const removeVideoFromPlayList = asyncHandler(async (req, res) => {
+  const { playListId, videoId } = req.params;
 
-  if (!playlistId || !videoId) {
+  if (!playListId || !videoId) {
     throw new ApiError(400, "PlaylistId and videoId both are required!!");
   }
   try {
-    const userOwner = await isUserOwnerofPlaylist(playlistId, req?.user?._id);
+    const userOwner = await isUserOwnerofPlaylist(playListId, req?.user?._id);
     if (!userOwner) {
       throw new ApiError(300, "Unauthorized Access");
     }
@@ -278,10 +297,71 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   }
 });
 
+const deletePlayList = asyncHandler(async (req, res) => {
+  const { playListId } = req.params;
+
+  if (!playListId) {
+    throw new ApiError(400, "Playlist ID is required");
+  }
+
+  try {
+    const userOwner = await isUserOwnerofPlaylist(playListId, req?.user?._id);
+    if (!userOwner) {
+      throw new ApiError(300, "Unauthorized Access");
+    }
+    const deletedPlaylist = await Playlist.findByIdAndDelete(playListId);
+    if (!deletedPlaylist) {
+      throw new ApiError(500, "Unable to delete the Playlist");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Playlist Deleted Successfully"));
+  } catch (error) {
+    throw new ApiError(500, error.message || "playlistId is not correct");
+  }
+});
+
+const updatePlayList = asyncHandler(async (req, res) => {
+  const { playListId } = req.params;
+  const { name, description } = req.body;
+  //TODO: update playlist
+  if (!playListId) {
+    throw new ApiError(400, "playlistId is required!!!");
+  }
+  try {
+    const userOwner = await isUserOwnerofPlaylist(playListId, req?.user?._id);
+    if (!userOwner) {
+      throw new ApiError(300, "Unauthorized Access");
+    }
+    if (!name || !description) {
+      throw new ApiError(404, "Name and Description Both are required!!!!");
+    }
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(playListId, {
+      $set: {
+        name: name,
+        description: description,
+      },
+    });
+
+    if (!updatedPlaylist) {
+      throw new ApiError(500, "Unable to update the Playlist");
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedPlaylist, "Playlist Updated Successfully")
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message || "playlistId is not correct");
+  }
+});
+
 export {
   createPlayList,
   getUserPlayLists,
   getPlayListById,
   addVideoToPlayList,
-  removeVideoFromPlaylist,
+  removeVideoFromPlayList,
+  deletePlayList,
+  updatePlayList,
 };
