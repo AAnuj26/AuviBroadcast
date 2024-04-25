@@ -210,9 +210,78 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
   }
 });
 
+const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
+  const { playlistId, videoId } = req.params;
+
+  if (!playlistId || !videoId) {
+    throw new ApiError(400, "PlaylistId and videoId both are required!!");
+  }
+  try {
+    const userOwner = await isUserOwnerofPlaylist(playlistId, req?.user?._id);
+    if (!userOwner) {
+      throw new ApiError(300, "Unauthorized Access");
+    }
+    //check video is present actually or published
+    const video = await Video.findById(videoId);
+    if (!video) {
+      throw new ApiError(404, "Video Not found");
+    }
+
+    //check video is added in playlist or not
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist.videos.includes(videoId)) {
+      throw new ApiError(404, "No Video Found in Playlist");
+    }
+    //video is not published
+    if (!video?.isPublished) {
+      const removedVideoFromPlaylist = await Playlist.updateOne(
+        {
+          _id: new mongoose.Types.ObjectId(playlistId),
+        },
+        {
+          $pull: { videos: videoId },
+        }
+      );
+      if (!removedVideoFromPlaylist) {
+        throw new ApiError(500, "Unable to remove ,Retry!!!!!");
+      }
+      return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Video Not found in the playlist"));
+    }
+    const removedVideoFromPlaylist = await Playlist.updateOne(
+      {
+        _id: new mongoose.Types.ObjectId(playlistId),
+      },
+      {
+        $pull: { videos: videoId },
+      }
+    );
+    if (!removedVideoFromPlaylist) {
+      throw new ApiError(500, "Unable to remove the video from the playlist");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          addedplaylist,
+          "Video Successfully Removed From Playlist"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error.message || "Unable to remove video from playlist"
+    );
+  }
+});
+
 export {
   createPlayList,
   getUserPlayLists,
   getPlayListById,
   addVideoToPlayList,
+  removeVideoFromPlaylist,
 };
