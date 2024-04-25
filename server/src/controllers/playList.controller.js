@@ -151,4 +151,68 @@ const getPlayListById = asyncHandler(async (req, res) => {
   }
 });
 
-export { createPlayList, getUserPlayLists, getPlayListById };
+const addVideoToPlayList = asyncHandler(async (req, res) => {
+  const { playListId, videoId } = req.params;
+
+  if (!playListId || !videoId) {
+    throw new ApiError(400, "Playlist ID and Video ID both required");
+  }
+
+  try {
+    const userOwner = await isUserOwnerofPlaylist(playlistId, req?.user?._id);
+    if (!userOwner) {
+      throw new ApiError(300, "Unauthorized Access");
+    }
+    const video = await Video.findById(videoId);
+    //if the video is not published but video owner and current user is same then owner can add to playlist only
+    if (
+      !video ||
+      (!(video.owner.toString() === req.user?._id.toString()) &&
+        !video?.isPublished)
+    ) {
+      throw new ApiError(404, "Video Not Found");
+    }
+    //check if the video is already added to playlist or not
+    const playlist = await Playlist.findById(playlistId);
+    if (playlist.videos.includes(videoId)) {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, {}, "Video Is  already present In Playlist")
+        );
+    }
+    const addedplaylist = await Playlist.updateOne(
+      {
+        _id: new mongoose.Types.ObjectId(playlistId),
+      },
+      {
+        $push: { videos: videoId },
+      }
+    );
+    if (!addedplaylist) {
+      throw new ApiError(500, "Unable to add the video to the playlist");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          addedplaylist,
+          "Video Successfully Added To Playlist"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error.message || "Unable to add video to the playlist"
+    );
+  }
+});
+
+export {
+  createPlayList,
+  getUserPlayLists,
+  getPlayListById,
+  addVideoToPlayList,
+};
