@@ -1,3 +1,4 @@
+import mongoose, { isValidObjectId } from "mongoose";
 import { Playlist } from "../models/playlist.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -94,4 +95,60 @@ const getUserPlayLists = asyncHandler(async (req, res) => {
   }
 });
 
-export { createPlayList, getUserPlayLists };
+const getPlayListById = asyncHandler(async (req, res) => {
+  const { playlistId } = req.params;
+  if (!playlistId) {
+    throw new ApiError(400, "Playlist ID is required");
+  }
+  try {
+    const playList = await Playlist.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(playlistId),
+        },
+      },
+      {
+        //if the user is owner then he can see the playlist with the unpublished video of himself
+        //but others can see the published video only
+        $project: {
+          name: 1,
+          description: 1,
+          owner: 1,
+          videos: {
+            $cond: {
+              if: {
+                $eq: ["$owner", new mongoose.Types.ObjectId(req?.user?._id)],
+              },
+              then: "$videos",
+              else: {
+                $filter: {
+                  input: "$videos",
+                  as: "video",
+                  cond: {
+                    $eq: ["$video.isPublished", true],
+                  },
+                },
+              },
+            },
+          },
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+    ]);
+
+    if (!playList) {
+      throw new ApiError(404, "Playlist not found");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, playList, "Playlist Fetched Successfully"));
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error.message || "playListId is not correct or playlist doesn't exist"
+    );
+  }
+});
+
+export { createPlayList, getUserPlayLists, getPlayListById };
