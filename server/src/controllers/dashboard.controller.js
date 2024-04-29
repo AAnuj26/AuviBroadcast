@@ -70,4 +70,23 @@ const getChannelStats = asyncHandler(async (req, res) => {
   }
 });
 
-export { getChannelStats };
+const getChannelVideos = asyncHandler(async (req, res) => {
+  // TODO: Get all the videos uploaded by the channel
+  const userId = req.user?._id;
+  try {
+    const videos = await Video.find({ owner: userId });
+
+    if (!videos || videos.length === 0) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, videos, "No video published yet"));
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, videos, "All videos fetched"));
+  } catch (e) {
+    throw new ApiError(200, e?.message || "Unable to fetch the videos!!");
+  }
+});
+
+export { getChannelStats, getChannelVideos };
