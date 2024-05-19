@@ -1,0 +1,28 @@
+.SignInButton {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 9999px;
+  background-color: transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: rgb(62, 166, 255);
+  border: 0px;
+  box-shadow: inset 0 0 0.5px 0.5px rgba(120, 118, 118, 0.5);
+  outline: 0.1px transparent;
+  outline-offset: 0.1px;
+  --tw--shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  &:hover {
+    background-color: rgba(62, 166, 255, 0.3);
+  }
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.25rem;
+  }
+  span {
+    margin-left: 0.25rem;
+  }
+}
