@@ -85,6 +85,45 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
   }
 });
 
+const toggleTweetLike = asyncHandler(async (req, res) => {
+  const { tweetId } = req.params;
+  //TODO: toggle like on tweet
+  if (!tweetId) {
+    throw new ApiError(400, "tweetId is required");
+  }
+  try {
+    const tweet = await Tweet.findById(tweetId);
+    if (!tweet) {
+      throw new ApiError(404, "tweet Not found");
+    }
+    const likecriteria = { tweet: tweetId, likedBy: req.user?._id };
+    const alreadyLiked = await Like.findOne(likecriteria);
+    if (!alreadyLiked) {
+      //create new like
+      const newLike = await Like.create(likecriteria);
+      if (!newLike) {
+        throw new ApiError(500, "Unable to like the tweet");
+      }
+      return res
+        .status(200)
+        .json(new ApiResponse(200, newLike, "Successfully like the tweet"));
+    }
+    //already liked
+    const dislike = await Like.deleteOne(likecriteria);
+    if (!dislike) {
+      throw new ApiError(500, "Unable to dislike the tweet");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Successfully dislike the tweet"));
+  } catch (e) {
+    throw new ApiError(
+      500,
+      e?.message || "Unable to toggle the like of the tweet"
+    );
+  }
+});
+
 const getLikedVideos = asyncHandler(async (req, res) => {
   //TODO: get all liked videos
   const userId = req.user?._id;
@@ -178,4 +217,4 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   }
 });
 
-export { toggleVideoLike, toggleCommentLike, getLikedVideos };
+export { toggleVideoLike, toggleCommentLike, toggleTweetLike, getLikedVideos };
