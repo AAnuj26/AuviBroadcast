@@ -95,4 +95,53 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   }
 });
 
-export { toggleSubscription, getUserChannelSubscribers };
+const getSubscribedChannels = asyncHandler(async (req, res) => {
+  const { channelId } = req.params;
+  if (!channelId) {
+    throw new ApiError(400, "subscriberId is Requitred!!");
+  }
+  try {
+    const subscribedChannels = await Subscription.aggregate([
+      {
+        $match: {
+          subscriber: new mongoose.Types.ObjectId(channelId),
+        },
+      },
+      {
+        $group: {
+          _id: "subscriber",
+          subscribedChannels: { $push: "$channel" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          subscribedChannels: 1,
+        },
+      },
+    ]);
+    if (!subscribedChannels || subscribedChannels.length === 0) {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, [], "No subscribedChannel found for the user")
+        );
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          subscribedChannels,
+          "All SubscribedChannels fetched Successfully!!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error?.message || "Unable te fetch subscribedChannels!"
+    );
+  }
+});
+
+export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };
