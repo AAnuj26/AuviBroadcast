@@ -1,8 +1,8 @@
-import menu from "./assets/menu.svg";
+// import menu from "./assets/menu.svg";
 import Navbar from "./components/Navbar/Navbar";
-import Sidebar from "./components/Sidebar/Sidebar";
-import VideoCard from "./components/VideoCard/VideoCard";
-import VideoListingPage from "./pages/VideoListingPage/VideoListingPage";
+// import Sidebar from "./components/Sidebar/Sidebar";
+// import VideoCard from "./components/VideoCard/VideoCard";
+// import VideoListingPage from "./pages/VideoListingPage/VideoListingPage";
 function App() {
   // const se = { width };
   return (
@@ -69,10 +69,10 @@ function App() {
       </div> */}
       {/* <VideoCard /> */}
       <Navbar />
-      <div>
+      {/* <div>
         {/* <Sidebar /> */}
-        <VideoListingPage />
-      </div>
+      {/* <VideoListingPage /> */}
+      {/* </div> */}
     </>
   );
 }
