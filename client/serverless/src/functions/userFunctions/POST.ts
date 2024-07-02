@@ -5,15 +5,15 @@ import {
   InvocationContext,
 } from "@azure/functions";
 
-import FirebaseService from "../../services/firebase/FireBaseService";
-
-import AwsService from "../../services/aws/AwsService";
-
 import Response from "../../utils/Response";
 
-const FireBase: FirebaseService = new FirebaseService();
+import { AzureBlobService } from "../../services/azure/AzureService";
 
-const Aws: AwsService = new AwsService();
+import FirebaseService from "../../services/firebase/FirebaseService";
+
+const AzureBlob = new AzureBlobService();
+
+const FireBase = new FirebaseService();
 
 export async function registerUser(
   request: HttpRequest,
@@ -21,7 +21,6 @@ export async function registerUser(
 ): Promise<HttpResponseInit> {
   try {
     const userData = await request.formData();
-
     const fullName: string = userData.get("fullName").toString();
     const displayName: string = userData.get("displayName").toString();
     const phoneNumber: string = userData.get("phoneNumber")
@@ -30,49 +29,28 @@ export async function registerUser(
     const age: number = Number(userData.get("age"));
     const email: string = userData.get("email").toString();
     const password: string = userData.get("password").toString();
-
     if (!displayName || !email || !password || !fullName) {
-      return new Response(400, null, "All Fields Are Required");
+      return new Response(400, "All Fields Are Required", null);
     }
-
     const avatar = userData.get("avatar");
-
     if (!avatar) {
-      return new Response(400, null, "Avatar Is Required");
+      return new Response(400, "Avatar Is Required", null);
     }
-
-    let avatarLink: string;
-    let coverImageLink: string;
-
+    let avatarUrl: string;
+    let coverImageUrl: string;
     for (const [key, value] of userData.entries()) {
       if (value instanceof Blob) {
-        const Key = `auvi-${key}-${Date.now()}`;
-        const Body = await value.arrayBuffer().then((buffer) => {
-          return Buffer.from(buffer);
-        });
-        await Aws.uploadFile(Key, Body);
-        await Aws.getSignedUrl(Key).then((url) => {
-          if (key == "avatar") {
-            if (url instanceof Error) {
-              return new Response(401, url, "Error While Uploading Avatar");
-            } else {
-              avatarLink = url.toString();
-            }
-          } else if (key == "coverImage") {
-            if (url instanceof Error) {
-              return new Response(
-                401,
-                url,
-                "Error While Uploading Cover Image"
-              );
-            } else {
-              coverImageLink = url.toString();
-            }
-          }
-        });
+        const blobName = `${displayName}-${key}-${Date.now()}-blob.jpg`;
+        const blobArrayBuffer = await value.arrayBuffer();
+        const blobUrl = await AzureBlob.uploadBlob(blobName, blobArrayBuffer);
+        if (key === "avatar") {
+          avatarUrl = blobUrl;
+        }
+        if (key === "coverImage") {
+          coverImageUrl = blobUrl;
+        }
       }
     }
-
     const user = {
       fullName: fullName,
       displayName: displayName,
@@ -80,30 +58,30 @@ export async function registerUser(
       age: age ? age : null,
       email: email,
       password: password,
-      photoURL: avatarLink,
-      coverImage: coverImageLink ? coverImageLink : null,
+      photoURL: avatarUrl,
+      coverImage: coverImageUrl ? coverImageUrl : null,
     };
 
     const createduser = await FireBase.registerUser(user);
     if (createduser instanceof Error) {
       return new Response(
         500,
-        createduser,
-        "Firebase Error While Registering User"
+        "Firebase Error While Registering User",
+        createduser
       );
     }
 
-    return new Response(201, createduser, "User Registered Successfully");
+    return new Response(201, "User Registered Successfully", user);
   } catch (error) {
-    console.log(error.message);
-    console.log(error);
     return new Response(
       500,
       error,
       "Internal Server Error While Registering User"
     );
   }
+  /*-------------------------------------------------------*/
 }
+
 export async function loginUser(
   request: HttpRequest,
   context: InvocationContext
@@ -122,17 +100,17 @@ export async function loginUser(
     if (loginUser instanceof Error) {
       return new Response(
         401,
-        loginUser,
-        "Firebase Error While Logging In User"
+        "Firebase Error While Logging In User",
+        loginUser
       );
     }
 
-    return new Response(200, loginUser, "User Logged In Successfully");
+    return new Response(200, "User Logged In Successfully", loginUser);
   } catch (error) {
     return new Response(
       500,
-      error,
-      "Internal Server Error While Logging In User"
+      "Internal Server Error While Logging In User",
+      error
     );
   }
 }
@@ -143,32 +121,32 @@ export async function logoutUser(
 ): Promise<HttpResponseInit> {
   try {
     await FireBase.logoutUser();
-    return new Response(200, null, "User Logged Out Successfully");
+    return new Response(200, "User Logged Out Successfully", null);
   } catch (error) {
     return new Response(
       500,
-      error,
-      "Internal Server Error While Logging Out User"
+      "Internal Server Error While Logging Out User",
+      error
     );
   }
 }
 
 app.http("registerUser", {
-  methods: ["POST"],
+  methods: ["GET", "POST"],
   authLevel: "anonymous",
-  route: "users/registerUser",
+  route: "user/registerUser",
   handler: registerUser,
 });
 
 app.http("loginUser", {
-  methods: ["POST"],
+  methods: ["GET", "POST"],
   authLevel: "anonymous",
   route: "user/loginUser",
   handler: loginUser,
 });
 
 app.http("logoutUser", {
-  methods: ["POST"],
+  methods: ["GET", "POST"],
   authLevel: "anonymous",
   route: "user/logoutUser",
   handler: logoutUser,

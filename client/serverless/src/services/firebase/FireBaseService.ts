@@ -23,9 +23,9 @@ import admin from "firebase-admin";
 
 import { getDatabase, Database, ref, set, get, child } from "firebase/database";
 
-import AzureKeyVaultService from "../azure/AzureKeyVaultService";
+import { AzureKeyVaultService } from "../azure/AzureService";
 
-const azureKeyVault: AzureKeyVaultService = new AzureKeyVaultService();
+const AzureKeyVault: AzureKeyVaultService = new AzureKeyVaultService();
 
 interface UserSchema {
   fullName: string;
@@ -56,26 +56,23 @@ class FirebaseService {
     this.auth = null;
     this.database = null;
     this.admin = null;
-    this.initializeFirebase();
+    this.initialize();
   }
 
-  public async initializeFirebase(): Promise<void | Error> {
+  public async initialize(): Promise<void | Error> {
     try {
-      if (this.myFirebaseApp && this.auth && this.database && this.admin) {
-        return;
-      } else {
-        const firebaseConfig: FirebaseOptions =
-          await azureKeyVault.getFireBaseValues();
-        this.myFirebaseApp = initializeApp(firebaseConfig);
-        this.auth = getAuth(this.myFirebaseApp);
-        this.database = getDatabase(this.myFirebaseApp);
-        this.admin = admin.initializeApp(firebaseConfig);
-        return;
-      }
+      const firebaseConfig: FirebaseOptions =
+        await AzureKeyVault.getFireBaseValues();
+      this.myFirebaseApp = initializeApp(firebaseConfig);
+      this.auth = getAuth(this.myFirebaseApp);
+      this.database = getDatabase(this.myFirebaseApp);
+      this.admin = admin.initializeApp(firebaseConfig);
+      return;
     } catch (error) {
       return error;
     }
   }
+
   public async authenticator(
     request: HttpRequest,
     context: InvocationContext,
@@ -115,8 +112,6 @@ class FirebaseService {
 
   public async registerUser(userData: UserSchema): Promise<UserObject | Error> {
     try {
-      await this.initializeFirebase();
-
       const userCredential: UserCredential =
         await createUserWithEmailAndPassword(
           this.auth,
@@ -159,8 +154,6 @@ class FirebaseService {
     password: string;
   }): Promise<User | Error> {
     try {
-      await this.initializeFirebase();
-
       const userCredential: UserCredential = await signInWithEmailAndPassword(
         this.auth,
         user.email,
@@ -175,68 +168,12 @@ class FirebaseService {
 
   public async logoutUser(): Promise<boolean | Error> {
     try {
-      await this.initializeFirebase();
-
       if (this.auth.currentUser) {
         await this.auth.signOut();
         return true;
       } else {
         return false;
       }
-    } catch (error) {
-      return error;
-    }
-  }
-  public async updateUserPassword(
-    newPassword: string
-  ): Promise<boolean | Error> {
-    try {
-      await this.initializeFirebase();
-      await updatePassword(this.auth.currentUser, newPassword);
-      return true;
-    } catch (error) {
-      return error;
-    }
-  }
-
-  public async currentUser(): Promise<UserObject | Error> {
-    const user: User = this.auth.currentUser;
-
-    return await get(child(ref(this.database), `users/${user.uid}`))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          return snapshot.val();
-        }
-      })
-      .catch((error) => {
-        return error;
-      });
-  }
-  public async updateAccountDetails(
-    displayName: string,
-    email: string,
-    fullName?: string,
-    phoneNumber?: string,
-    age?: number
-  ): Promise<boolean | Error> {
-    const userInfo = {
-      displayName: displayName,
-      email: email,
-    };
-
-    if (fullName) {
-      userInfo["fullName"] = fullName;
-    }
-    if (phoneNumber) {
-      userInfo["phoneNumber"] = phoneNumber;
-    }
-    if (age) {
-      userInfo["age"] = age;
-    }
-
-    try {
-      await updateProfile(this.auth.currentUser, userInfo);
-      return true;
     } catch (error) {
       return error;
     }
