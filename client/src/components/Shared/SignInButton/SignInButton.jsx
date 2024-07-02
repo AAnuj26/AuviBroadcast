@@ -5,7 +5,7 @@ const SignInButton = ({ setIsLoggedIn }) => {
     <button
       type="button"
       className={Styles.SignInButton}
-      onClick={setIsLoggedIn(true)}
+      onClick={() => setIsLoggedIn(true)}
     >
       <img src={userSvg} alt="userSvg" />
       <span>Sign in</span>
