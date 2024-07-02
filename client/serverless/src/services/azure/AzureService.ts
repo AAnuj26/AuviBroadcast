@@ -8,7 +8,7 @@ class AzureKeyVaultService {
   private credential: DefaultAzureCredential;
   private client: SecretClient;
   constructor() {
-    this.vaultURL = process.env["AzureVaultURL"];
+    this.vaultURL = "https://auvi-secrets.vault.azure.net";
     this.credential = new DefaultAzureCredential();
     this.client = new SecretClient(this.vaultURL, this.credential);
   }
