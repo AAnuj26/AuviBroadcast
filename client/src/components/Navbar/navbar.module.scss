@@ -105,24 +105,48 @@
     justify-content: flex-end;
     align-items: center;
     margin-right: 0.5rem;
-    > div > button {
+    > div:first-child {
       display: flex;
-      height: 40px;
-      background-color: transparent;
-      border: none;
-      border-radius: 9999px;
-      margin-right: 0.75rem;
-      // width: 40px;
-      padding: 8px;
-      // color-scheme: light;
+      > button {
+        display: flex;
+        height: 40px;
+        background-color: transparent;
+        border: none;
+        border-radius: 9999px;
+        margin-right: 0.75rem;
+        // width: 40px;
+        padding: 8px;
+        // color-scheme: light;
 
-      > img {
-        justify-content: center;
-        height: 25px;
+        > img {
+          justify-content: center;
+          height: 25px;
+        }
+
+        &:hover {
+          background-color: #27272a;
+        }
       }
+    }
+    > div.avatar {
+      > button {
+        display: flex;
+        height: auto;
 
-      &:hover {
-        background-color: #27272a;
+        background-color: transparent;
+        border: none;
+        border-radius: 9999px;
+        margin-right: 1rem;
+        margin-left: 0.1rem;
+        width: auto;
+        padding: 8px;
+        // color-scheme: light;
+        > img.avatarImg {
+          display: "inline-block";
+          height: "2.25rem";
+          width: "2.25rem";
+          border-radius: "999px";
+        }
       }
     }
   }
