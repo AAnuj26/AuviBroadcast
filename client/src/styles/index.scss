@@ -1,3 +1,7 @@
+$primary-background: #0f0f0f;
+$primary-color: #18181b;
+$secondary-color: red;
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -5,7 +9,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #171717;
+  background-color: #{$primary-background};
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,7 +17,7 @@
 body {
   margin: 0;
 }
-$background: #171717;
+$background: #0f0f0f;
 $primary-color: #18181b;
 $secondary-color: red;
 // $secondary-color: #00ff00;

@@ -9,8 +9,8 @@ import microphone from "../../assets/microphone.svg";
 import searchIcon from "../../assets/search.svg";
 import videoCam from "../../assets/videocam.svg";
 import bell from "../../assets/bell.svg";
-import "../../index.scss";
-
+// import "../../index.scss";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 const Navbar = () => {
@@ -55,7 +55,9 @@ const Navbar = () => {
                   <img src={menu2} alt="menu2" />
                 </button>
               </div>
-              <SignInButton setIsLoggedIn={setIsLoggedIn} />
+              <Link to="/signin">
+                <SignInButton onClick={() => setIsLoggedIn(true)} />
+              </Link>
             </>
           ) : (
             <>
