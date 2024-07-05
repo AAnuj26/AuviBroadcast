@@ -9,7 +9,7 @@ import Response from "../../utils/Response";
 
 import { AzureBlobService } from "../../services/azure/AzureService";
 
-import FirebaseService from "../../services/firebase/FirebaseService";
+import FirebaseService from "../../services/firebase/FireBaseService";
 
 const AzureBlob = new AzureBlobService();
 
@@ -119,35 +119,77 @@ export async function logoutUser(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  try {
-    await FireBase.logoutUser();
-    return new Response(200, "User Logged Out Successfully", null);
-  } catch (error) {
-    return new Response(
-      500,
-      "Internal Server Error While Logging Out User",
-      error
-    );
-  }
+  return FireBase.authenticator(request, context, async () => {
+    try {
+      await FireBase.logoutUser();
+      return new Response(200, "User Logged Out Successfully", null);
+    } catch (error) {
+      return new Response(
+        500,
+        "Internal Server Error While Logging Out User",
+        error
+      );
+    }
+  });
+}
+
+export async function changeCurrentPassword(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  return FireBase.authenticator(request, context, async () => {
+    try {
+      const userData = await request.formData();
+      const email: string = userData.get("email").toString();
+
+      const changedPassword = await FireBase.resetPassword(email);
+      if (changedPassword instanceof Error) {
+        return new Response(
+          401,
+          "Firebase Error While Changing Password",
+          changedPassword
+        );
+      }
+
+      return new Response(
+        200,
+        "Password Changed Successfully",
+        changedPassword
+      );
+    } catch (error) {
+      return new Response(
+        500,
+        "Internal Server Error While Changing Password",
+        error
+      );
+    }
+  });
 }
 
 app.http("registerUser", {
-  methods: ["GET", "POST"],
+  methods: ["POST"],
   authLevel: "anonymous",
   route: "user/registerUser",
   handler: registerUser,
 });
 
 app.http("loginUser", {
-  methods: ["GET", "POST"],
+  methods: ["POST"],
   authLevel: "anonymous",
   route: "user/loginUser",
   handler: loginUser,
 });
 
 app.http("logoutUser", {
-  methods: ["GET", "POST"],
+  methods: ["POST"],
   authLevel: "anonymous",
   route: "user/logoutUser",
   handler: logoutUser,
+});
+
+app.http("changeCurrentPassword", {
+  methods: ["POST"],
+  authLevel: "anonymous",
+  route: "user/changeCurrentPassword",
+  handler: changeCurrentPassword,
 });
