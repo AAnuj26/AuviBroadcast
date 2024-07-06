@@ -10,6 +10,8 @@ import {
   signInWithEmailAndPassword,
   updatePassword,
   sendPasswordResetEmail,
+  signInWithRedirect,
+  GoogleAuthProvider,
 } from "firebase/auth";
 
 import {
@@ -161,6 +163,20 @@ class FirebaseService {
         user.password
       );
 
+      return userCredential.user;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async loginWithGoogle(): Promise<User | Error> {
+    try {
+      const provider = new GoogleAuthProvider();
+
+      const userCredential: UserCredential = await signInWithRedirect(
+        this.auth,
+        provider
+      );
       return userCredential.user;
     } catch (error) {
       return error;

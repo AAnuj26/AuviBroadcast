@@ -115,6 +115,29 @@ export async function loginUser(
   }
 }
 
+export async function loginUserWithGoogle(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const loggedInWithGoogle = await FireBase.loginWithGoogle();
+    if (loggedInWithGoogle instanceof Error) {
+      return new Response(
+        401,
+        "Firebase Error While Logging In User",
+        loggedInWithGoogle
+      );
+    }
+    return new Response(200, "User Logged In Successfully", loggedInWithGoogle);
+  } catch (error) {
+    return new Response(
+      500,
+      "Internal Server Error While Logging In User",
+      error
+    );
+  }
+}
+
 export async function logoutUser(
   request: HttpRequest,
   context: InvocationContext
@@ -192,4 +215,11 @@ app.http("changeCurrentPassword", {
   authLevel: "anonymous",
   route: "user/changeCurrentPassword",
   handler: changeCurrentPassword,
+});
+
+app.http("loginUserWithGoogle", {
+  methods: ["POST"],
+  authLevel: "anonymous",
+  route: "user/loginUserWithGoogle",
+  handler: loginUserWithGoogle,
 });
