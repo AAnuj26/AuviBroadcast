@@ -1,7 +1,8 @@
+import React from "react";
+
 import SearchBar from "../Shared/SearchBar/SearchBar";
 import Styles from "./navbar.module.scss";
 import SignInButton from "../Shared/SignInButton/SignInButton";
-
 import menu from "../../assets/menu.svg";
 import logo from "../../assets/auvilogo.svg";
 import menu2 from "../../assets/menu2.svg";
@@ -11,10 +12,10 @@ import videoCam from "../../assets/videocam.svg";
 import bell from "../../assets/bell.svg";
 import "../../index.scss";
 
-import { useState } from "react";
+// import { useState } from "react";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(true);
 
   const avatarStyle2 = {
     display: "inline-block",

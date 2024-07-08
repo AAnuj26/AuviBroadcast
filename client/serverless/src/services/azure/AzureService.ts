@@ -53,9 +53,8 @@ class AzureBlobService {
     );
     this.blobServiceClient =
       BlobServiceClient.fromConnectionString(blobConnectionString);
-    this.containerClient = this.blobServiceClient.getContainerClient(
-      process.env["BlobContainerName"]
-    );
+    this.containerClient =
+      this.blobServiceClient.getContainerClient("userblobs");
   }
 
   async uploadBlob(
