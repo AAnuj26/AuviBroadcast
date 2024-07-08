@@ -13,7 +13,7 @@ type Comment = {
 class PostGresSqlService {
   private sql: any;
   constructor() {
-    this.sql = null;
+    // this.sql = null;
     this.initialize();
   }
 
@@ -26,10 +26,15 @@ class PostGresSqlService {
   }
 
   public async getVideoComments(videoId: string) {
-    const comments = await this.sql.query(
-      `SELECT * FROM comments WHERE videoId = '${videoId}'`
-    );
-    return comments;
+    try {
+      const comments = await this.sql(
+        `SELECT * FROM comments WHERE video = $1`,
+        [videoId]
+      );
+      return comments;
+    } catch (error) {
+      return error;
+    }
   }
   public async getComment(commentId: string) {
     const comment = await this.sql.query(
@@ -37,7 +42,11 @@ class PostGresSqlService {
     );
     return comment;
   }
-
+  public async getAllCommentByAUser(owner: string) {
+    const comments = await this
+      .sql`SELECT * FROM comments WHERE owner = '${owner}'`;
+    return comments;
+  }
   public async addComment(comment: Comment) {
     const { content, video, owner } = comment;
     await this.sql.query(

@@ -11,39 +11,39 @@ import FirebaseService from "../../services/firebase/FireBaseService";
 
 import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
-import RedisService from "../../services/redis/RedisService";
+// import RedisService from "../../services/redis/RedisService";
 
 const FireBase: FirebaseService = new FirebaseService();
 
 const PostGre: PostGresSqlService = new PostGresSqlService();
 
-const Redis: RedisService = new RedisService();
+// const Redis: RedisService = new RedisService();
 
 export async function updateComment(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  return FireBase.authenticator(request, context, async () => {
-    try {
-      const videoId = request.params.videoId;
-      const userData = await request.formData();
-      const content = userData.get("content").toString();
-      const commentId = userData.get("commentId").toString();
+  // return FireBase.authenticator(request, context, async () => {
+  try {
+    const videoId = request.params.videoId;
+    const userData = await request.formData();
+    const content = userData.get("content").toString();
+    const commentId = userData.get("commentId").toString();
 
-      await PostGre.updateComment(commentId, content);
-      await Redis.set(
-        videoId,
-        JSON.stringify(await PostGre.getVideoComments(videoId))
-      );
-      return new Response(200, "Comment Added Successfully", null);
-    } catch (error) {
-      return new Response(
-        500,
-        "Internal Server Error While Getting Video Comments",
-        error
-      );
-    }
-  });
+    await PostGre.updateComment(commentId, content);
+    // await Redis.set(
+    //   videoId,
+    //   JSON.stringify(await PostGre.getVideoComments(videoId))
+    // );
+    return new Response(200, "Comment updated Successfully", videoId);
+  } catch (error) {
+    return new Response(
+      500,
+      "Internal Server Error While Getting Video Comments",
+      error
+    );
+  }
+  // });
 }
 
 app.http("updateComment", {

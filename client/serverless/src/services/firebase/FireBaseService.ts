@@ -52,13 +52,9 @@ class FirebaseService {
   private myFirebaseApp: FirebaseApp;
   private auth: Auth;
   private database: Database;
-  private admin: admin.app.App;
+  private admin = admin;
 
   constructor() {
-    this.myFirebaseApp = null;
-    this.auth = null;
-    this.database = null;
-    this.admin = null;
     this.initialize();
   }
 
@@ -69,7 +65,7 @@ class FirebaseService {
       this.myFirebaseApp = initializeApp(firebaseConfig);
       this.auth = getAuth(this.myFirebaseApp);
       this.database = getDatabase(this.myFirebaseApp);
-      this.admin = admin.initializeApp(firebaseConfig);
+      this.admin.initializeApp(firebaseConfig);
       return;
     } catch (error) {
       return error;
@@ -87,7 +83,7 @@ class FirebaseService {
         currentUserToken = await this.auth.currentUser
           .getIdToken(/* forceRefresh true*/)
           .then((idToken) => {
-            console.log("Token from auth : \n", idToken);
+            // console.log("Token from auth : \n", idToken);
             return idToken;
           });
       } catch (error) {
@@ -99,15 +95,20 @@ class FirebaseService {
           .auth()
           .verifyIdToken(currentUserToken)
           .then((decodedToken) => {
+            // console.log("Decoded Token : \n", decodedToken);
             return decodedToken;
           });
       } catch (error) {
         return new Response(403, "Unauthorized Request : Invalid Token", error);
       }
 
-      if (isValid) {
-        return next();
-      }
+      console.log("isValid : ", isValid);
+
+      return await next();
+
+      // if (isValid) {
+      //   return await next();
+      // }
     } catch (error) {
       return new Response(500, "FireBase Error While Authorizing ", error);
     }
