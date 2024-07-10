@@ -1,0 +1,23 @@
+@use "../utils" as u;
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  // font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: u.$font;
+  margin: 0;
+  padding: 0;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: var(--primary-background);
+}

@@ -1,10 +1,9 @@
-import Styles from "./videoCard.module.scss";
-import anujPhoto from "../../assets/anuj-photo.jpg";
-import menu2 from "../../assets/menu2.svg";
+// import anujPhoto from "../../assets/anuj-photo.jpg";
+// import menu2 from "../../assets/menu2.svg";
 const VideoCard = () => {
   return (
     <>
-      <article className={Styles.VideoCard}>
+      <article className="VideoCardContainer">
         <a href="#" data-duration="12:24">
           <img
             src="http://unsplash.it/250/150?gravity=center"
