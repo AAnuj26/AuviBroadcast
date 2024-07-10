@@ -1,22 +1,39 @@
-import React from "react";
 import { useRoutes } from "react-router-dom";
-import Homepage from "../pages/Homepage";
-import SignIn from "../pages/SignIn";
-import SignUp from "../pages/SignUp";
+import { Outlet } from "react-router-dom";
+import Navbar from "../components/Navbar/Navbar.jsx";
+import SideBar from "../components/SideBar";
+import { VideoListingPage, ChannelPage } from "../pages";
+
+const Layout = () => {
+  return (
+    <>
+      <header>
+        <Navbar />
+      </header>
+      <main>
+        <SideBar />
+        <Outlet />
+      </main>
+    </>
+  );
+};
 
 const ProjectRoutes = () => {
   let element = useRoutes([
     {
       path: "/",
-      element: <Homepage />,
-    },
-    {
-      path: "/signin",
-      element: <SignIn />,
-    },
-    {
-      path: "/signup",
-      element: <SignUp />,
+      element: <Layout />,
+      children: [
+        {
+          path: "/",
+          element: <VideoListingPage />,
+        },
+
+        {
+          path: "/channel",
+          element: <ChannelPage />,
+        },
+      ],
     },
   ]);
 
