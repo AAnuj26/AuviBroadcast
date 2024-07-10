@@ -15,14 +15,10 @@ class Response {
         data: data ? data : null,
       };
     } else {
-      if (data instanceof Error) {
-      }
       this.status = status;
       this.message = message;
       if (data instanceof Error) {
         this.body = data.message;
-      } else {
-        this.body = data.code;
       }
       // this.body = data ?data.code : null;
       this.jsonBody = {

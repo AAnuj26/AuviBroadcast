@@ -51,6 +51,10 @@ export async function registerUser(
         }
       }
     }
+
+    if (!avatarUrl && !coverImageUrl) {
+      return new Response(400, "Avatar or Cover Image Is Required", null);
+    }
     const user = {
       fullName: fullName,
       displayName: displayName,
