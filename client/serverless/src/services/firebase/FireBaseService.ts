@@ -9,6 +9,9 @@ import {
   updateProfile,
   signInWithEmailAndPassword,
   updatePassword,
+  sendPasswordResetEmail,
+  signInWithRedirect,
+  GoogleAuthProvider,
 } from "firebase/auth";
 
 import {
@@ -166,6 +169,20 @@ class FirebaseService {
     }
   }
 
+  public async loginWithGoogle(): Promise<User | Error> {
+    try {
+      const provider = new GoogleAuthProvider();
+
+      const userCredential: UserCredential = await signInWithRedirect(
+        this.auth,
+        provider
+      );
+      return userCredential.user;
+    } catch (error) {
+      return error;
+    }
+  }
+
   public async logoutUser(): Promise<boolean | Error> {
     try {
       if (this.auth.currentUser) {
@@ -177,6 +194,49 @@ class FirebaseService {
     } catch (error) {
       return error;
     }
+  }
+
+  // public async changeCurrentPassword(
+  //   newPassword: string
+  // ): Promise<boolean | Error> {
+  //   try {
+  //     await updatePassword(this.auth.currentUser, newPassword);
+  //     return true;
+  //   } catch (error) {
+  //     return error;
+  //   }
+  // }
+
+  public async resetPassword(email: string): Promise<boolean | Error> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async deleteUser(uid: string): Promise<boolean | Error> {
+    try {
+      await this.auth.currentUser.delete();
+      await set(ref(this.database, `users/${uid}`), null);
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
+  public async getCurrentUser(): Promise<UserObject | Error> {
+    const user: User = this.auth.currentUser;
+
+    return await get(child(ref(this.database), `users/${user.uid}`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          return snapshot.val();
+        }
+      })
+      .catch((error) => {
+        return error;
+      });
   }
 }
 
