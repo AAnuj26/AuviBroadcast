@@ -89,9 +89,9 @@ class FirebaseService {
       } catch (error) {
         return new Response(401, "Unauthorized Request : No User Found", error);
       }
-      let isValid: any;
+      // let isValid: any;
       try {
-        isValid = await this.admin
+        const isValid = await this.admin
           .auth()
           .verifyIdToken(currentUserToken)
           .then((decodedToken) => {
@@ -102,7 +102,7 @@ class FirebaseService {
         return new Response(403, "Unauthorized Request : Invalid Token", error);
       }
 
-      console.log("isValid : ", isValid);
+      // console.log("isValid : ", isValid);
 
       return await next();
 
@@ -226,18 +226,18 @@ class FirebaseService {
       return error;
     }
   }
-  public async getCurrentUser(): Promise<UserObject | Error> {
-    const user: User = this.auth.currentUser;
+  public async getCurrentUser(): Promise<UserObject | Error | User> {
+    return this.auth.currentUser;
 
-    return await get(child(ref(this.database), `users/${user.uid}`))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          return snapshot.val();
-        }
-      })
-      .catch((error) => {
-        return error;
-      });
+    // return await get(child(ref(this.database), `users/${user.uid}`))
+    //   .then((snapshot) => {
+    //     if (snapshot.exists()) {
+    //       return snapshot.val();
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     return error;
+    //   });
   }
 }
 

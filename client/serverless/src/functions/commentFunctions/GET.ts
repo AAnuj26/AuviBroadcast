@@ -11,13 +11,13 @@ import FirebaseService from "../../services/firebase/FireBaseService";
 
 import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
-// import RedisService from "../../services/redis/RedisService";
+import RedisService from "../../services/redis/RedisService";
 
 const FireBase: FirebaseService = new FirebaseService();
 
 const PostGre: PostGresSqlService = new PostGresSqlService();
 
-// const Redis: RedisService = new RedisService();
+const Redis: RedisService = new RedisService();
 
 export async function getVideoComments(
   request: HttpRequest,
@@ -27,18 +27,18 @@ export async function getVideoComments(
     try {
       const videoId = request.params.videoId;
       console.log("videoId", videoId);
-      // const cachedComments = await Redis.get(videoId);
-      // if (cachedComments.length > 0) {
-      // return new Response(200, "Video Comments Found", cachedComments);
-      // } else {
-      const comments = await PostGre.getVideoComments(videoId);
+      const cachedComments = await Redis.get(videoId);
+      if (cachedComments) {
+        return new Response(200, "Video Comments Found", cachedComments);
+      } else {
+        const comments = await PostGre.getVideoComments(videoId);
 
-      if (comments instanceof Error) {
-        return new Response(403, "PostgreSQL Service Error", comments);
+        if (comments instanceof Error) {
+          return new Response(403, "PostgreSQL Service Error", comments);
+        }
+        await Redis.set(videoId, JSON.stringify(comments));
+        return new Response(200, "Video Comments Found", comments);
       }
-
-      return new Response(200, "Video Comments Found", comments);
-      // }
     } catch (error) {
       return new Response(
         500,

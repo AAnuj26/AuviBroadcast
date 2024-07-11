@@ -16,6 +16,7 @@
     "@azure/keyvault-secrets": "^4.8.0",
     "@azure/storage-blob": "^12.23.0",
     "@neondatabase/serverless": "^0.9.4",
+    "@upstash/redis": "^1.31.6",
     "firebase": "^10.12.2",
     "firebase-admin": "^12.2.0"
   },
