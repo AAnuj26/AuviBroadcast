@@ -31,13 +31,7 @@ export async function getUserPlaylists(
     try {
       const user = await FireBase.getCurrentUser();
 
-      // const cachedPlaylists = await Redis.get(`playlists:${user.uid}`);
-      // if (cachedPlaylists) {
-      //   return new Response(200, "User Playlists", cachedPlaylists);
-      // }
-
       const result = await Mongo.findUserPlaylists(user.uid);
-      // await Redis.set(`playlists:${result._id}`, result);
 
       return new Response(200, "User Playlists", result);
     } catch (error) {
