@@ -190,6 +190,49 @@ class PostGresSqlService {
       return error;
     }
   }
+  public async getLikesOnVideos(videoId: string) {
+    try {
+      const likes = await this.sql(
+        `SELECT * FROM video_likes WHERE video = $1`,
+        [videoId]
+      );
+      return likes;
+    } catch (error) {
+      return error;
+    }
+  }
+  public async getAllDislikesOnVideos(videoId: string) {
+    try {
+      const dislikes = await this.sql(
+        `SELECT * FROM video_dislikes WHERE video = $1`,
+        [videoId]
+      );
+      return dislikes;
+    } catch (error) {
+      return error;
+    }
+  }
+  public async getLikedComments(uid: string) {
+    try {
+      const likedComments = await this.sql(
+        `SELECT * FROM comment_likes WHERE liked_by = $1`,
+        [uid]
+      );
+      return likedComments;
+    } catch (error) {
+      return error;
+    }
+  }
+  public async getUserPosts(uid: string) {
+    try {
+      const posts = await this.sql(`SELECT * FROM posts WHERE owner = $1`, [
+        uid,
+      ]);
+      return posts;
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default PostGresSqlService;

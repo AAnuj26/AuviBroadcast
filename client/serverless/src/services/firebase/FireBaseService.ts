@@ -226,7 +226,7 @@ class FirebaseService {
       return error;
     }
   }
-  public async getCurrentUser(): Promise<UserObject | Error | User> {
+  public async getCurrentUser(): Promise<any> {
     return this.auth.currentUser;
 
     // return await get(child(ref(this.database), `users/${user.uid}`))

@@ -23,7 +23,7 @@ class RedisService {
     return;
   }
 
-  public async set(key: string, value: string): Promise<boolean> {
+  public async set(key: any, value: any): Promise<boolean> {
     try {
       const oneDayInSeconds = 86400;
       await this.redis.set(key, value, { ex: oneDayInSeconds });
