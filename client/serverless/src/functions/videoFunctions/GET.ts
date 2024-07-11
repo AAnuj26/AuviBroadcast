@@ -9,6 +9,8 @@ import Response from "../../utils/Response";
 
 import FirebaseService from "../../services/firebase/FireBaseService";
 
+import MongoService from "../../services/mongo/MongoDBService";
+
 import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
 import RedisService from "../../services/redis/RedisService";
@@ -17,48 +19,33 @@ const FireBase: FirebaseService = new FirebaseService();
 
 const PostGre: PostGresSqlService = new PostGresSqlService();
 
+const Mongo: MongoService = new MongoService();
+
 const Redis: RedisService = new RedisService();
 
-export async function addComment(
+export async function getVideoById(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   return FireBase.authenticator(request, context, async () => {
     try {
       const videoId = request.params.videoId;
-      const userData = await request.formData();
-      const content = userData.get("content").toString();
-      const owner = userData.get("owner").toString();
-      const comment = {
-        content: content,
-        video: videoId,
-        owner: owner,
-      };
 
-      // Redis Cache
-      const existingComments = await Redis.get(videoId);
-      if (existingComments) {
-        existingComments.push(comment);
-        await Redis.set(videoId, JSON.stringify(existingComments));
-      }
-
-      // Upload To PostGreSQL
-      await PostGre.addComment(comment);
-
-      return new Response(200, "Comment Added Successfully", comment);
+      const video = await Mongo.video.findOne({ _id: videoId });
+      return new Response(200, "Video Retrieved Successfully", video);
     } catch (error) {
       return new Response(
         500,
-        "Internal Server Error While Getting Video Comments",
+        "Internal Server Error While Getting Video",
         error
       );
     }
   });
 }
 
-app.http("addComment", {
-  methods: ["POST"],
+app.http("getVideoById", {
+  methods: ["GET"],
   authLevel: "anonymous",
-  route: "comment/addComment/{videoId}",
-  handler: addComment,
+  route: "getVideoById/{videoId}",
+  handler: getVideoById,
 });

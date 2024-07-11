@@ -35,7 +35,7 @@ export async function updateComment(
         videoId,
         JSON.stringify(await PostGre.getVideoComments(videoId))
       );
-      return new Response(200, "Comment Added Successfully", null);
+      return new Response(200, "Comment updated Successfully", videoId);
     } catch (error) {
       return new Response(
         500,

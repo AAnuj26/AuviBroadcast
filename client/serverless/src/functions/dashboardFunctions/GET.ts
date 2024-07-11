@@ -9,6 +9,8 @@ import Response from "../../utils/Response";
 
 import FirebaseService from "../../services/firebase/FireBaseService";
 
+import MongoService from "../../services/mongo/MongoDBService";
+
 import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
 import RedisService from "../../services/redis/RedisService";
@@ -17,41 +19,43 @@ const FireBase: FirebaseService = new FirebaseService();
 
 const PostGre: PostGresSqlService = new PostGresSqlService();
 
+const Mongo: MongoService = new MongoService();
+
 const Redis: RedisService = new RedisService();
 
-export async function getVideoComments(
+export async function getChannelStats(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   return FireBase.authenticator(request, context, async () => {
     try {
-      const videoId = request.params.videoId;
-      console.log("videoId", videoId);
-      const cachedComments = await Redis.get(videoId);
-      if (cachedComments) {
-        return new Response(200, "Video Comments Found", cachedComments);
-      } else {
-        const comments = await PostGre.getVideoComments(videoId);
+      await Mongo.connect();
+      const user = await FireBase.getCurrentUser();
+      const allVideos = await Mongo.video.find({ owner: user.uid }).toArray();
+      const likesOnVideos = await PostGre.getLikesOnVideos(allVideos);
+      const dislikesOnVideos = await PostGre.getAllDislikesOnVideos(allVideos);
 
-        if (comments instanceof Error) {
-          return new Response(403, "PostgreSQL Service Error", comments);
-        }
-        await Redis.set(videoId, JSON.stringify(comments));
-        return new Response(200, "Video Comments Found", comments);
-      }
+      const content = {
+        user,
+        allVideos,
+        likesOnVideos,
+        dislikesOnVideos,
+      };
+
+      return new Response(200, "Video Stats Retrieved Successfully", content);
     } catch (error) {
       return new Response(
         500,
-        "Internal Server Error While Getting Video Comments",
+        "Internal Server Error While Getting Video",
         error
       );
     }
   });
 }
 
-app.http("getVideoComments", {
+app.http("getChannelStats", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "comment/getVideoComments/{videoId}",
-  handler: getVideoComments,
+  route: "dashboard/getChannelStats",
+  handler: getChannelStats,
 });

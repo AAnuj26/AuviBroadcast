@@ -7,8 +7,10 @@ const AzureKeyVault: AzureKeyVaultService = new AzureKeyVaultService();
 class RedisService {
   private redis: Redis;
   constructor() {
-    this.redis = null;
     this.initialize();
+
+    // this.redis = null;
+    // this.initialize();
   }
 
   private async initialize() {
@@ -21,7 +23,7 @@ class RedisService {
     return;
   }
 
-  public async set(key: string, value: string): Promise<boolean> {
+  public async set(key: any, value: any): Promise<boolean> {
     try {
       const oneDayInSeconds = 86400;
       await this.redis.set(key, value, { ex: oneDayInSeconds });
@@ -30,9 +32,11 @@ class RedisService {
       return error;
     }
   }
-  public async get(key: string): Promise<string | null> {
+
+  public async get(key: string): Promise<any> {
     return await this.redis.get(key);
   }
+
   public async delete(key: string): Promise<boolean> {
     try {
       await this.redis.del(key);
@@ -44,3 +48,5 @@ class RedisService {
 }
 
 export default RedisService;
+
+// // export const RedisService = "Redis";

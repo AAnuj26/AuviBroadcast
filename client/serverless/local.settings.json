@@ -3,7 +3,6 @@
   "Values": {
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "PostGreSQLConnectionString": "postgresql://auvi-postgre_owner:kOE7wQS8cvlZ@ep-odd-morning-a1w2z7m0.ap-southeast-1.aws.neon.tech/auvi-postgre?sslmode=require"
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing"
   }
 }

@@ -9,6 +9,8 @@ import Response from "../../utils/Response";
 
 import FirebaseService from "../../services/firebase/FireBaseService";
 
+import MongoService from "../../services/mongo/MongoDBService";
+
 import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
 import RedisService from "../../services/redis/RedisService";
@@ -17,41 +19,32 @@ const FireBase: FirebaseService = new FirebaseService();
 
 const PostGre: PostGresSqlService = new PostGresSqlService();
 
+const Mongo: MongoService = new MongoService();
+
 const Redis: RedisService = new RedisService();
 
-export async function getVideoComments(
+export async function getUserPosts(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   return FireBase.authenticator(request, context, async () => {
     try {
-      const videoId = request.params.videoId;
-      console.log("videoId", videoId);
-      const cachedComments = await Redis.get(videoId);
-      if (cachedComments) {
-        return new Response(200, "Video Comments Found", cachedComments);
-      } else {
-        const comments = await PostGre.getVideoComments(videoId);
-
-        if (comments instanceof Error) {
-          return new Response(403, "PostgreSQL Service Error", comments);
-        }
-        await Redis.set(videoId, JSON.stringify(comments));
-        return new Response(200, "Video Comments Found", comments);
-      }
+      const user = await FireBase.getCurrentUser();
+      const posts = await PostGre.getUserPosts(user.uid);
+      return new Response(200, "Posts Retrieved Successfully", posts);
     } catch (error) {
       return new Response(
         500,
-        "Internal Server Error While Getting Video Comments",
+        "Internal Server Error While Getting Posts",
         error
       );
     }
   });
 }
 
-app.http("getVideoComments", {
+app.http("getUserPosts", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "comment/getVideoComments/{videoId}",
-  handler: getVideoComments,
+  route: "post/getUserPosts",
+  handler: getUserPosts,
 });
