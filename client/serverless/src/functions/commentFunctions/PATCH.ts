@@ -28,13 +28,11 @@ export async function updateComment(
       const videoId = request.params.videoId;
       const userData = await request.formData();
       const content = userData.get("content").toString();
-      const commentId = userData.get("commentId").toString();
+      const commentId = request.params.commentId;
 
       await PostGre.updateComment(commentId, content);
-      await Redis.set(
-        videoId,
-        JSON.stringify(await PostGre.getVideoComments(videoId))
-      );
+      const updatedComments = await PostGre.getVideoComments(videoId);
+      await Redis.set(`comments:${videoId}`, updatedComments);
       return new Response(200, "Comment updated Successfully", videoId);
     } catch (error) {
       return new Response(
@@ -49,6 +47,6 @@ export async function updateComment(
 app.http("updateComment", {
   methods: ["PATCH"],
   authLevel: "anonymous",
-  route: "comment/updateComment/{videoId}",
+  route: "comment/updateComment/{videoId}/{commentId}",
   handler: updateComment,
 });

@@ -26,19 +26,19 @@ export async function getVideoComments(
   return FireBase.authenticator(request, context, async () => {
     try {
       const videoId = request.params.videoId;
-      console.log("videoId", videoId);
-      const cachedComments = await Redis.get(videoId);
+      const cachedComments = await Redis.get(`comments:${videoId}`);
       if (cachedComments) {
         return new Response(200, "Video Comments Found", cachedComments);
-      } else {
-        const comments = await PostGre.getVideoComments(videoId);
-
-        if (comments instanceof Error) {
-          return new Response(403, "PostgreSQL Service Error", comments);
-        }
-        await Redis.set(videoId, JSON.stringify(comments));
-        return new Response(200, "Video Comments Found", comments);
       }
+
+      const comments = await PostGre.getVideoComments(videoId);
+
+      if (comments instanceof Error) {
+        return new Response(403, "PostgreSQL Service Error", comments);
+      }
+      await Redis.set(`comments:${videoId}`, comments);
+      return new Response(200, "Video Comments Found", comments);
+      // }
     } catch (error) {
       return new Response(
         500,

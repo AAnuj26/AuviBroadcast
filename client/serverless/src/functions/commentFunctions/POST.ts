@@ -26,24 +26,18 @@ export async function addComment(
   return FireBase.authenticator(request, context, async () => {
     try {
       const videoId = request.params.videoId;
-      const userData = await request.formData();
-      const content = userData.get("content").toString();
-      const owner = userData.get("owner").toString();
+      const data = await request.formData();
+      const content = data.get("content").toString();
+      const user = await FireBase.getCurrentUser();
       const comment = {
         content: content,
         video: videoId,
-        owner: owner,
+        owner: user.uid,
       };
 
-      // Redis Cache
-      const existingComments = await Redis.get(videoId);
-      if (existingComments) {
-        existingComments.push(comment);
-        await Redis.set(videoId, JSON.stringify(existingComments));
-      }
-
-      // Upload To PostGreSQL
       await PostGre.addComment(comment);
+      const uploadedComments = await PostGre.getVideoComments(videoId);
+      await Redis.set(`comments:${videoId}`, uploadedComments);
 
       return new Response(200, "Comment Added Successfully", comment);
     } catch (error) {
