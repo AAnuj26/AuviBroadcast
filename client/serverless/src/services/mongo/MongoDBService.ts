@@ -193,6 +193,154 @@ class MongoService {
       return error;
     }
   }
+
+  /*--------------------------------------------------*/
+
+  public async isUserVideoOwner(videoId: any, uid: string) {
+    try {
+      await this.connect();
+      const video = await this.video.findOne({ _id: videoId });
+      if (video.owner === uid) {
+        await this.close();
+        return true;
+      }
+      await this.close();
+      return false;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async getAllVideos(
+    page: number,
+    limit: number,
+    query: string,
+    uid?: string
+  ) {
+    try {
+      await this.connect();
+      const pipeline = [];
+
+      if (uid) {
+        pipeline.push({
+          $match: {
+            owner: new ObjectId(uid),
+          },
+        });
+      }
+      if (query) {
+        pipeline.push({
+          $match: {
+            $text: {
+              $search: query,
+            },
+          },
+        });
+      }
+
+      const sortCriteria = {};
+
+      sortCriteria["createdAt"] = -1;
+      pipeline.push({
+        $sort: sortCriteria,
+      });
+
+      pipeline.push({
+        $skip: (page - 1) * limit,
+      });
+      pipeline.push({
+        $limit: limit,
+      });
+      const videos = await this.video.aggregate(pipeline).toArray();
+
+      await this.close();
+      return videos;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async updateVideo(videoId: string, video: any) {
+    try {
+      await this.connect();
+      const result = await this.video.updateOne(
+        { _id: new ObjectId(videoId) },
+        {
+          $set: {
+            isPublished: !video.isPublished,
+          },
+        },
+        { new: true }
+      );
+
+      await this.close();
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async updateVideoDetails(
+    videoId: string,
+    title,
+    description,
+    thumbnailUrl
+  ) {
+    try {
+      await this.connect();
+      const updatedVideo = await this.video.updateOne(
+        { _id: new ObjectId(videoId) },
+        {
+          $set: {
+            title: title,
+            description: description,
+            thumbnail: thumbnailUrl,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      await this.close();
+      return updatedVideo;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async deleteVideo(videoId: string) {
+    try {
+      await this.connect();
+      const result = await this.video.deleteOne({ _id: new ObjectId(videoId) });
+      await this.close();
+      return result.deletedCount >= 1 ? true : false;
+    } catch (error) {
+      return error;
+    }
+  }
+  public async deleteVideoFromPlaylist(videoId: string) {
+    try {
+      await this.connect();
+      const result = await this.video.find({
+        videos: new ObjectId(videoId),
+      });
+      for (const playlist of result) {
+        await result.findByIdAndUpdate(
+          playlist._id,
+          {
+            $pull: { videos: videoId },
+          },
+          {
+            new: true,
+          }
+        );
+      }
+      await this.close();
+      return result.deletedCount >= 1 ? true : false;
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default MongoService;
