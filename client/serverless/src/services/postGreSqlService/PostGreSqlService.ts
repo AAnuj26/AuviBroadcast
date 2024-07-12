@@ -17,6 +17,8 @@ class PostGresSqlService {
     this.initialize();
   }
 
+  /*------------------------ Init -----------------------------------------------------------*/
+
   private async initialize() {
     const connectionString = await AzureKeyVault.getSecret(
       "PostGreSQLConnectionString"
@@ -24,6 +26,8 @@ class PostGresSqlService {
     this.sql = neon(connectionString);
     return;
   }
+
+  /*------------------------ comments -----------------------------------------------------------*/
 
   public async getVideoComments(videoId: string) {
     try {
@@ -36,17 +40,20 @@ class PostGresSqlService {
       return error;
     }
   }
+
   public async getComment(commentId: string) {
     const comment = await this.sql.query(
       `SELECT * FROM comments WHERE id = '${commentId}'`
     );
     return comment;
   }
+
   public async getAllCommentByAUser(owner: string) {
     const comments = await this
       .sql`SELECT * FROM comments WHERE owner = '${owner}'`;
     return comments;
   }
+
   public async addComment(comment: Comment) {
     // const { content, video, owner } = comment;
     const content = comment.content;
@@ -61,6 +68,7 @@ class PostGresSqlService {
     );
     return;
   }
+
   public async deleteComment(commentId: string) {
     // await this.sql.query(`DELETE FROM comments WHERE id = '${commentId}'`);
     // return;
@@ -70,6 +78,7 @@ class PostGresSqlService {
       return error;
     }
   }
+
   public async updateComment(commentId: string, content: string) {
     try {
       return await this.sql(`UPDATE comments SET content = $1 WHERE id = $2`, [
@@ -81,24 +90,52 @@ class PostGresSqlService {
     }
   }
 
+  /*------------------------ Likes -----------------------------------------------------------*/
+
   public async toggleVideoLike(videoId: string, uid: string) {
     try {
       const like = await this.sql(
-        `SELECT * FROM video_likes WHERE video = $1 , liked_by = $2`,
+        `SELECT * FROM video_likes WHERE video = $1 AND liked_by = $2`,
         [videoId, uid]
       );
-      if (like) {
+
+      console.log("Like -> \n", like);
+      if (like && like.length > 0) {
         await this.sql(
-          `DELETE FROM video_likes WHERE video = $1 , liked_by = $2`,
+          `DELETE FROM video_likes WHERE video = $1 AND liked_by = $2`,
           [videoId, uid]
         );
-        return;
+        return false;
       } else {
         await this.sql(
           `INSERT INTO video_likes (video, liked_by) VALUES ($1, $2)`,
           [videoId, uid]
         );
-        return;
+        return true;
+      }
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async toggleCommentLike(commentId: string, uid: string) {
+    try {
+      const like = await this.sql(
+        `SELECT * FROM comment_likes WHERE comment_id = $1 AND liked_by = $2`,
+        [commentId, uid]
+      );
+      if (like && like.length > 0) {
+        await this.sql(
+          `DELETE FROM comment_likes WHERE comment_id = $1 AND liked_by = $2`,
+          [commentId, uid]
+        );
+        return false;
+      } else {
+        await this.sql(
+          `INSERT INTO comment_likes (comment_id, liked_by) VALUES ($1, $2)`,
+          [commentId, uid]
+        );
+        return true;
       }
     } catch (error) {
       return error;
@@ -117,31 +154,57 @@ class PostGresSqlService {
     }
   }
 
-  public async toggleCommentLike(commentId: string, uid: string) {
+  public async getLikesOnVideos(videoId: string) {
     try {
-      const like = await this.sql(
-        `SELECT * FROM comment_likes WHERE comment = $1 , liked_by = $2`,
-        [commentId, uid]
+      const likes = await this.sql(
+        `SELECT * FROM video_likes WHERE video = $1`,
+        [videoId]
       );
-      if (like) {
-        await this.sql(
-          `DELETE FROM comment_likes WHERE comment = $1 , liked_by = $2`,
-          [commentId, uid]
-        );
-        return;
-      } else {
-        await this.sql(
-          `INSERT INTO comment_likes (comment, liked_by) VALUES ($1, $2)`,
-          [commentId, uid]
-        );
-        return;
-      }
+      return likes;
     } catch (error) {
       return error;
     }
   }
 
-  /*-----------------------------------------------------------------------------------*/
+  public async getLikedComments(uid: string) {
+    try {
+      const likedComments = await this.sql(
+        `SELECT * FROM comment_likes WHERE liked_by = $1`,
+        [uid]
+      );
+      return likedComments;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async getLikesOnComment(commentId: string) {
+    try {
+      const likes = await this.sql(
+        `SELECT * FROM comment_likes WHERE comment_id = $1`,
+        [commentId]
+      );
+      console.log("Likes -> \n", likes);
+      return likes;
+    } catch (error) {
+      return error;
+    }
+  }
+  /*------------------------ Dislikes -----------------------------------------------------------*/
+
+  public async getAllDislikesOnVideos(videoId: string) {
+    try {
+      const dislikes = await this.sql(
+        `SELECT * FROM video_dislikes WHERE video = $1`,
+        [videoId]
+      );
+      return dislikes;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  /*------------------------ Subscription -----------------------------------------------------------*/
 
   public async getSubscribers(channelId: string) {
     try {
@@ -190,40 +253,9 @@ class PostGresSqlService {
       return error;
     }
   }
-  /*-----------------------------------------------------------------------------------*/
-  public async getLikesOnVideos(videoId: string) {
-    try {
-      const likes = await this.sql(
-        `SELECT * FROM video_likes WHERE video = $1`,
-        [videoId]
-      );
-      return likes;
-    } catch (error) {
-      return error;
-    }
-  }
-  public async getAllDislikesOnVideos(videoId: string) {
-    try {
-      const dislikes = await this.sql(
-        `SELECT * FROM video_dislikes WHERE video = $1`,
-        [videoId]
-      );
-      return dislikes;
-    } catch (error) {
-      return error;
-    }
-  }
-  public async getLikedComments(uid: string) {
-    try {
-      const likedComments = await this.sql(
-        `SELECT * FROM comment_likes WHERE liked_by = $1`,
-        [uid]
-      );
-      return likedComments;
-    } catch (error) {
-      return error;
-    }
-  }
+
+  /*------------------------------- Posts -------------------------------------------------*/
+
   public async getUserPosts(uid: string) {
     try {
       const posts = await this.sql(`SELECT * FROM posts WHERE owner = $1`, [
