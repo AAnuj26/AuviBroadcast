@@ -1,51 +1,51 @@
-import {
-  app,
-  HttpRequest,
-  HttpResponseInit,
-  InvocationContext,
-} from "@azure/functions";
+// import {
+//   app,
+//   HttpRequest,
+//   HttpResponseInit,
+//   InvocationContext,
+// } from "@azure/functions";
 
-import Response from "../../utils/Response";
+// import Response from "../../utils/Response";
 
-import FirebaseService from "../../services/firebase/FireBaseService";
+// import FirebaseService from "../../services/firebase/FireBaseService";
 
-import MongoService from "../../services/mongo/MongoDBService";
+// import MongoService from "../../services/mongo/MongoDBService";
 
-import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
+// import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
-import RedisService from "../../services/redis/RedisService";
+// import RedisService from "../../services/redis/RedisService";
 
-const FireBase: FirebaseService = new FirebaseService();
+// const FireBase: FirebaseService = new FirebaseService();
 
-const PostGre: PostGresSqlService = new PostGresSqlService();
+// const PostGre: PostGresSqlService = new PostGresSqlService();
 
-const Mongo: MongoService = new MongoService();
+// const Mongo: MongoService = new MongoService();
 
-const Redis: RedisService = new RedisService();
+// const Redis: RedisService = new RedisService();
 
-export async function getVideoById(
-  request: HttpRequest,
-  context: InvocationContext
-): Promise<HttpResponseInit> {
-  return FireBase.authenticator(request, context, async () => {
-    try {
-      const videoId = request.params.videoId;
+// export async function getVideoById(
+//   request: HttpRequest,
+//   context: InvocationContext
+// ): Promise<HttpResponseInit> {
+//   return FireBase.authenticator(request, context, async () => {
+//     try {
+//       const videoId = request.params.videoId;
 
-      const video = await Mongo.video.findOne({ _id: videoId });
-      return new Response(200, "Video Retrieved Successfully", video);
-    } catch (error) {
-      return new Response(
-        500,
-        "Internal Server Error While Getting Video",
-        error
-      );
-    }
-  });
-}
+//       const video = await Mongo.video.findOne({ _id: videoId });
+//       return new Response(200, "Video Retrieved Successfully", video);
+//     } catch (error) {
+//       return new Response(
+//         500,
+//         "Internal Server Error While Getting Video",
+//         error
+//       );
+//     }
+//   });
+// }
 
-app.http("getVideoById", {
-  methods: ["GET"],
-  authLevel: "anonymous",
-  route: "getVideoById/{videoId}",
-  handler: getVideoById,
-});
+// app.http("getVideoById", {
+//   methods: ["GET"],
+//   authLevel: "anonymous",
+//   route: "getVideoById/{videoId}",
+//   handler: getVideoById,
+// });

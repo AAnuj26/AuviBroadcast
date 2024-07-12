@@ -182,6 +182,17 @@ class MongoService {
       return error;
     }
   }
+
+  public async getAllUserVideos(uid: string) {
+    try {
+      await this.connect();
+      const result = await this.video.find({ owner: uid }).toArray();
+      await this.close();
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default MongoService;

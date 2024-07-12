@@ -29,15 +29,9 @@ export async function deleteComment(
       const commentId = request.params.commentId;
 
       await PostGre.deleteComment(commentId);
-      const cachedComments = await Redis.get(videoId);
-      if (cachedComments.length === 1) {
-        await Redis.delete(videoId);
-      } else {
-        await Redis.set(
-          videoId,
-          JSON.stringify(await PostGre.getVideoComments(videoId))
-        );
-      }
+      const remainingComments = await PostGre.getVideoComments(videoId);
+      await Redis.set(`comments:${videoId}`, remainingComments);
+
       return new Response(200, "Comment Deleted Successfully", null);
     } catch (error) {
       return new Response(

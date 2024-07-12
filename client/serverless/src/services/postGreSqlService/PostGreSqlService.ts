@@ -1,7 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 
 import { AzureKeyVaultService } from "../../services/azure/AzureService";
-import { getUserChannelSubscribers } from "../../functions/subscriptionFunctions/GET";
 
 const AzureKeyVault = new AzureKeyVaultService();
 
@@ -63,14 +62,23 @@ class PostGresSqlService {
     return;
   }
   public async deleteComment(commentId: string) {
-    await this.sql.query(`DELETE FROM comments WHERE id = '${commentId}'`);
-    return;
+    // await this.sql.query(`DELETE FROM comments WHERE id = '${commentId}'`);
+    // return;
+    try {
+      return await this.sql(`DELETE FROM comments WHERE id = $1`, [commentId]);
+    } catch (error) {
+      return error;
+    }
   }
   public async updateComment(commentId: string, content: string) {
-    await this.sql.query(
-      `UPDATE comments SET content = '${content}' WHERE id = '${commentId}'`
-    );
-    return;
+    try {
+      return await this.sql(`UPDATE comments SET content = $1 WHERE id = $2`, [
+        content,
+        commentId,
+      ]);
+    } catch (error) {
+      return error;
+    }
   }
 
   public async toggleVideoLike(videoId: string, uid: string) {
@@ -133,11 +141,13 @@ class PostGresSqlService {
     }
   }
 
-  public async getUserChannelSubscribers(subscriberId: string) {
+  /*-----------------------------------------------------------------------------------*/
+
+  public async getSubscribers(channelId: string) {
     try {
       const subscribers = await this.sql(
-        `SELECT * FROM subscriptions WHERE subscriber = $1`,
-        [subscriberId]
+        `SELECT * FROM subscriptions WHERE channel = $1`,
+        [channelId]
       );
       return subscribers;
     } catch (error) {
@@ -145,40 +155,6 @@ class PostGresSqlService {
     }
   }
 
-  public async getSubscribedChannels(channelId: string) {
-    try {
-      const subscribedChannels = await this.sql(
-        `SELECT * FROM subscriptions WHERE channel = $1`,
-        [channelId]
-      );
-      return subscribedChannels;
-    } catch (error) {
-      return error;
-    }
-  }
-  public async toggleSubscription(channelId: string, subscriberId: string) {
-    try {
-      const subscription = await this.sql(
-        `SELECT * FROM subscriptions WHERE channel = $1 , subscriber = $2`,
-        [channelId, subscriberId]
-      );
-      if (subscription) {
-        await this.sql(
-          `DELETE FROM subscriptions WHERE channel = $1 , subscriber = $2`,
-          [channelId, subscriberId]
-        );
-        return false;
-      } else {
-        await this.sql(
-          `INSERT INTO subscriptions (channel, subscriber) VALUES ($1, $2)`,
-          [channelId, subscriberId]
-        );
-        return true;
-      }
-    } catch (error) {
-      return error;
-    }
-  }
   public async getSubscriptions(subscriberId: string) {
     try {
       const subscriptions = await this.sql(
@@ -190,6 +166,31 @@ class PostGresSqlService {
       return error;
     }
   }
+
+  public async toggleSubscription(uid: string, channelId: string) {
+    try {
+      const subscription = await this.sql(
+        `SELECT * FROM subscriptions WHERE subscriber = $1 AND channel = $2`,
+        [uid, channelId]
+      );
+      if (subscription && subscription.length > 0) {
+        await this.sql(
+          `DELETE FROM subscriptions WHERE subscriber = $1 AND channel = $2`,
+          [uid, channelId]
+        );
+        return false;
+      } else {
+        await this.sql(
+          `INSERT INTO subscriptions (subscriber, channel) VALUES ($1, $2)`,
+          [uid, channelId]
+        );
+        return true;
+      }
+    } catch (error) {
+      return error;
+    }
+  }
+  /*-----------------------------------------------------------------------------------*/
   public async getLikesOnVideos(videoId: string) {
     try {
       const likes = await this.sql(

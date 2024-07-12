@@ -34,26 +34,24 @@ export async function toggleSubscription(
     const channelId = request.params.channelId;
 
     const subscription: boolean = await PostGre.toggleSubscription(
-      channelId,
-      uid
+      uid,
+      channelId
     );
 
     if (subscription) {
-      const cache = await PostGre.getSubscriptions(uid);
-      await Redis.set(`subscriptions:${uid}`, cache);
-      return new Response(
-        200,
-        "Subscription Added",
-        await PostGre.getSubscriptions(uid)
-      );
+      const subscribers = await PostGre.getSubscribers(channelId);
+      await Redis.set(`subscribers:${channelId}`, subscribers);
+      const subscriptions = await PostGre.getSubscriptions(uid);
+      await Redis.set(`subscriptions:${uid}`, subscriptions);
+
+      return new Response(200, "Subscribed Successfully");
     } else {
-      const cache = await PostGre.getSubscriptions(uid);
-      await Redis.set(`subscriptions:${uid}`, cache);
-      return new Response(
-        200,
-        "Subscription Removed",
-        await PostGre.getSubscriptions(uid)
-      );
+      const subscribers = await PostGre.getSubscribers(channelId);
+      await Redis.set(`subscribers:${channelId}`, subscribers);
+      const subscriptions = await PostGre.getSubscriptions(uid);
+      await Redis.set(`subscriptions:${uid}`, subscriptions);
+
+      return new Response(200, "Unsubscribed Successfully");
     }
   } catch (error) {
     return new Response(
@@ -67,6 +65,6 @@ export async function toggleSubscription(
 app.http("toggleSubscription", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "togglesubscriber/c/{channelId}",
+  route: "subscription/togglesubscription/{channelId}",
   handler: toggleSubscription,
 });
