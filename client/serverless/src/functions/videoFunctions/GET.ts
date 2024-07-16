@@ -11,13 +11,13 @@ import FirebaseService from "../../services/firebase/FireBaseService";
 
 import MongoService from "../../services/mongo/MongoDBService";
 
-import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
+// import PostGresSqlService from "../../services/postGreSqlService/PostGreSqlService";
 
 import RedisService from "../../services/redis/RedisService";
 
 const FireBase: FirebaseService = new FirebaseService();
 
-const PostGre: PostGresSqlService = new PostGresSqlService();
+// const PostGre: PostGresSqlService = new PostGresSqlService();
 
 const Mongo: MongoService = new MongoService();
 
@@ -41,7 +41,7 @@ export async function getAllVideos(
 
       const user = await FireBase.getCurrentUser();
 
-      const videos = await Mongo.getAllVideos(page, limit, query, user.uid);
+      const videos = await Mongo.getAllVideos(/*page,*/ limit, query, user.uid);
 
       if (videos.length === 0) {
         return new Response(404, "No Videos Found", []);

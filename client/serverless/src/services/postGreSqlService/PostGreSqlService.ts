@@ -79,6 +79,14 @@ class PostGresSqlService {
     }
   }
 
+  public async deleteAllCommentsOfAVideo(videoId: string) {
+    try {
+      return await this.sql(`DELETE FROM comments WHERE video = $1`, [videoId]);
+    } catch (error) {
+      return error;
+    }
+  }
+
   public async updateComment(commentId: string, content: string) {
     try {
       return await this.sql(`UPDATE comments SET content = $1 WHERE id = $2`, [
@@ -190,6 +198,17 @@ class PostGresSqlService {
       return error;
     }
   }
+
+  public async deleteVideoLikes(videoId: string) {
+    try {
+      return await this.sql(`DELETE FROM video_likes WHERE video = $1`, [
+        videoId,
+      ]);
+    } catch (error) {
+      return error;
+    }
+  }
+
   /*------------------------ Dislikes -----------------------------------------------------------*/
 
   public async getAllDislikesOnVideos(videoId: string) {
@@ -262,6 +281,17 @@ class PostGresSqlService {
         uid,
       ]);
       return posts;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async getPostById(postId: string) {
+    try {
+      const post = await this.sql(`SELECT * FROM posts WHERE id = $1`, [
+        postId,
+      ]);
+      return post;
     } catch (error) {
       return error;
     }

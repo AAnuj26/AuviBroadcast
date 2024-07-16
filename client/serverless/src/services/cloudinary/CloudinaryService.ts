@@ -21,9 +21,10 @@ class CloudinaryService {
     });
   }
 
-  public async uploadImageFromBuffer(buffer: Buffer) {
+  public async uploadImageFromBuffer(key: string, buffer: Buffer) {
     try {
       return await this.cloudinary.uploader.upload(buffer, {
+        public_id: key,
         resource_type: "image",
       });
     } catch (error) {

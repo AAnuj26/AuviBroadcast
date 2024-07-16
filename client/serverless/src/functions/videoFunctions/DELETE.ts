@@ -31,6 +31,11 @@ export async function deleteVideo(
     try {
       const videoId = request.params.videoId;
       const video = await Mongo.findVideoById(videoId);
+
+      if (!video) {
+        return new Response(404, "Video Not Found", []);
+      }
+
       const user = await FireBase.getCurrentUser();
       const authorized = await Mongo.isUserVideoOwner(videoId, user.uid);
       if (!authorized) {
@@ -38,8 +43,25 @@ export async function deleteVideo(
       }
       const deletedVideo = await Mongo.deleteVideo(videoId);
 
-      // await PostGre.deleteLikes(videoId);
-      // await PostGre.deleteComments(videoId);
+      const deleteLikes = await PostGre.deleteVideoLikes(videoId);
+
+      if (deleteLikes instanceof Error) {
+        return new Response(
+          500,
+          "Internal Server Error While Deleting Video",
+          deleteLikes
+        );
+      }
+
+      const deleteComments = await PostGre.deleteAllCommentsOfAVideo(videoId);
+
+      if (deleteComments instanceof Error) {
+        return new Response(
+          500,
+          "Internal Server Error While Deleting Video",
+          deleteComments
+        );
+      }
 
       if (deletedVideo instanceof Error) {
         return new Response(

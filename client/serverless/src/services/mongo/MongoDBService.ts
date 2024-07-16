@@ -17,12 +17,15 @@ class MongoService {
     this.playlist = this.client.db("auvi").collection("playlist");
     this.video = this.client.db("auvi").collection("video");
   }
-  async connect() {
+
+  private async connect() {
     return await this.client.connect();
   }
-  async close() {
+
+  private async close() {
     return await this.client.close();
   }
+
   public async isUserOwnerOfPlaylist(playlistId: string, uid: string) {
     try {
       await this.connect();
@@ -183,17 +186,6 @@ class MongoService {
     }
   }
 
-  public async getAllUserVideos(uid: string) {
-    try {
-      await this.connect();
-      const result = await this.video.find({ owner: uid }).toArray();
-      await this.close();
-      return result;
-    } catch (error) {
-      return error;
-    }
-  }
-
   /*--------------------------------------------------*/
 
   public async isUserVideoOwner(videoId: any, uid: string) {
@@ -211,47 +203,77 @@ class MongoService {
     }
   }
 
+  public async getAllUserVideos(uid: string) {
+    try {
+      await this.connect();
+      const result = await this.video.find({ owner: uid }).toArray();
+      await this.close();
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
+
   public async getAllVideos(
-    page: number,
+    // page: number,
     limit: number,
     query: string,
     uid?: string
   ) {
     try {
+      // console.log("Checking Parameters\nuid ->\n", uid);
+      // console.log("page ->\n", page);
+      // console.log("limit ->\n", limit);
+      // console.log("query ->\n", query);
+
       await this.connect();
-      const pipeline = [];
+      const videos = await this.video
+        .find({
+          $or: [{ published: true }, { published: false, userId: uid }],
+          $and: [{ title: { $regex: query, $options: "i" } }],
+        })
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .toArray();
+      // const pipeline = [];
+      // console.log("Pipeline ->\n", pipeline);
 
-      if (uid) {
-        pipeline.push({
-          $match: {
-            owner: new ObjectId(uid),
-          },
-        });
-      }
-      if (query) {
-        pipeline.push({
-          $match: {
-            $text: {
-              $search: query,
-            },
-          },
-        });
-      }
+      // if (uid) {
+      //   pipeline.push({
+      //     $match: {
+      //       owner: new ObjectId(uid),
+      //     },
+      //   });
+      //   console.log("uid pipe ->\n", pipeline);
+      // }
+      // if (query) {
+      //   pipeline.push({
+      //     $match: {
+      //       $text: {
+      //         $search: query,
+      //       },
+      //     },
+      //   });
+      //   console.log("query pipe ->\n", pipeline);
+      // }
 
-      const sortCriteria = {};
+      // const sortCriteria = {};
 
-      sortCriteria["createdAt"] = -1;
-      pipeline.push({
-        $sort: sortCriteria,
-      });
+      // sortCriteria["createdAt"] = -1;
+      // pipeline.push({
+      //   $sort: -1,
+      // });
 
-      pipeline.push({
-        $skip: (page - 1) * limit,
-      });
-      pipeline.push({
-        $limit: limit,
-      });
-      const videos = await this.video.aggregate(pipeline).toArray();
+      // pipeline.push({
+      //   $skip: (page - 1) * limit,
+      // });
+      // pipeline.push({
+      //   $limit: limit,
+      // });
+
+      // const videos = await this.video.aggregate(pipeline).toArray();
+
+      // console.log("Videos ->\n", videos);
 
       await this.close();
       return videos;
@@ -260,7 +282,18 @@ class MongoService {
     }
   }
 
-  public async updateVideo(videoId: string, video: any) {
+  public async createVideo(video: any) {
+    try {
+      await this.connect();
+      const result = await this.video.insertOne(video);
+      await this.close();
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async updateVideoPublication(videoId: string, video: any) {
     try {
       await this.connect();
       const result = await this.video.updateOne(
@@ -321,7 +354,7 @@ class MongoService {
   public async deleteVideoFromPlaylist(videoId: string) {
     try {
       await this.connect();
-      const result = await this.video.find({
+      const result = await this.playlist.find({
         videos: new ObjectId(videoId),
       });
       for (const playlist of result) {
@@ -336,7 +369,7 @@ class MongoService {
         );
       }
       await this.close();
-      return result.deletedCount >= 1 ? true : false;
+      return true;
     } catch (error) {
       return error;
     }

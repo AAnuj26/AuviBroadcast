@@ -31,34 +31,21 @@ const Mongo: MongoService = new MongoService();
 
 const Redis: RedisService = new RedisService();
 
-export async function getPost(
+export async function createPost(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   return FireBase.authenticator(request, context, async () => {
     try {
-      const postId = request.params.postId;
-
-      const post = await PostGre.getPostById(postId);
-
-      if (post instanceof Error || !post || post.length === 0) {
-        return new Response(404, "Post Not Found", []);
-      }
-
-      return new Response(200, "Post Found", post);
     } catch (error) {
-      return new Response(
-        500,
-        "Internal Server Error While Getting The Post",
-        error
-      );
+      return new Response(500, "Internal Server Error While Posting", error);
     }
   });
 }
 
-app.http("getPost", {
-  methods: ["GET"],
+app.http("createPost", {
+  methods: ["POST"],
   authLevel: "anonymous",
-  route: "video/getpost",
-  handler: getPost,
+  route: "video/createpost",
+  handler: createPost,
 });

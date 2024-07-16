@@ -25,15 +25,16 @@ class AzureKeyVaultService {
       appId: await this.getSecret("FireBaseAppId"),
     };
   }
-  // async getAwsValues(): Promise<S3ClientConfig> {
-  //   return {
-  //     region: await this.getSecret("AwsRegion"),
-  //     credentials: {
-  //       accessKeyId: await this.getSecret("AwsAccessKeyId"),
-  //       secretAccessKey: await this.getSecret("AwsSecretAccessKey"),
-  //     },
-  //   };
-  // }
+
+  async getAwsValues() {
+    return {
+      region: await this.getSecret("AwsRegion"),
+      credentials: {
+        accessKeyId: await this.getSecret("AwsAccessKeyId"),
+        secretAccessKey: await this.getSecret("AwsSecretAccessKey"),
+      },
+    };
+  }
 }
 
 const AzureKeyVault = new AzureKeyVaultService();
