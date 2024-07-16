@@ -33,23 +33,32 @@ export async function toggleVideoLike(
     const uid: string = user.uid;
     const videoId: string = request.params.videoId;
 
-    const videoLike: boolean = await PostGre.toggleVideoLike(videoId, uid);
+    const videoLike: any = await PostGre.toggleVideoLike(videoId, uid);
+    console.log("VideoLike -> \n", videoLike);
+
+    if (videoLike instanceof Error) {
+      return new Response(
+        500,
+        "Internal Server Error While Liking The Video",
+        videoLike
+      );
+    }
 
     if (videoLike) {
       const cache = await PostGre.getLikedVideos(uid);
       await Redis.set(`likedVideos:${uid}`, cache);
       return new Response(
         200,
-        "Video Liked",
-        await PostGre.getLikedVideos(uid)
+        "Video Liked"
+        // await PostGre.getLikedVideos(uid)
       );
     } else {
       const cache = await PostGre.getLikedVideos(uid);
       await Redis.set(`likedVideos:${uid}`, cache);
       return new Response(
         200,
-        "Video Unliked",
-        await PostGre.getLikedVideos(uid)
+        "Video Unliked"
+        // await PostGre.getLikedVideos(uid)
       );
     }
   } catch (error) {
@@ -80,19 +89,11 @@ export async function toggleCommentLike(
       if (commentLike) {
         const cache = await PostGre.getLikedComments(uid);
         await Redis.set(`likedComments:${uid}`, cache);
-        return new Response(
-          200,
-          "Comment Liked",
-          await PostGre.getLikedComments(uid)
-        );
+        return new Response(200, "Comment Liked");
       } else {
         const cache = await PostGre.getLikedComments(uid);
         await Redis.set(`likedComments:${uid}`, cache);
-        return new Response(
-          200,
-          "Comment Unliked",
-          await PostGre.getLikedComments(uid)
-        );
+        return new Response(200, "Comment Unliked");
       }
     } catch (error) {
       return new Response(
@@ -107,13 +108,13 @@ export async function toggleCommentLike(
 app.http("toggleVideoLike", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "togglelike/v/{videoId}",
+  route: "like/togglevideolike/{videoId}",
   handler: toggleVideoLike,
 });
 
 app.http("toggleCommentLike", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "togglelike/c/{commentId}",
+  route: "like/toggleCommentLike/{commentId}",
   handler: toggleCommentLike,
 });
