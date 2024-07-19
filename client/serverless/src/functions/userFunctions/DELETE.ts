@@ -5,8 +5,6 @@ import {
   InvocationContext,
 } from "@azure/functions";
 
-import Response from "../../utils/Response";
-
 import FirebaseService from "../../services/firebase/FireBaseService";
 
 const FireBase = new FirebaseService();
@@ -17,26 +15,41 @@ export async function deleteUser(
 ): Promise<HttpResponseInit> {
   return FireBase.authenticator(request, context, async () => {
     try {
-      //   const userData = await request.formData();
-      //   const uid = userData.get("uid").toString();
       const user = await FireBase.getCurrentUser();
 
       if (user instanceof Error) {
-        return new Response(403, "Forbidden", null);
+        return {
+          jsonBody: {
+            status: 403,
+            message: "Forbidden To Delete User",
+          },
+        };
       } else {
         if (!user.uid) {
-          return new Response(403, "Forbidden", null);
+          return {
+            jsonBody: {
+              status: 403,
+              message: "Forbidden To Delete User",
+            },
+          };
         } else {
           await FireBase.deleteUser(user.uid);
-          return new Response(200, "User Deleted Successfully", null);
+          await FireBase.logoutUser();
+          return {
+            jsonBody: {
+              status: 200,
+              message: "Deleted User Successfully",
+            },
+          };
         }
       }
     } catch (error) {
-      return new Response(
-        500,
-        "Internal Server Error While Deleting user",
-        error
-      );
+      return {
+        jsonBody: {
+          status: 500,
+          message: "Internal Server Error While Deleting User",
+        },
+      };
     }
   });
 }
@@ -44,6 +57,6 @@ export async function deleteUser(
 app.http("deleteUser", {
   methods: ["DELETE"],
   authLevel: "anonymous",
-  route: "user/deleteUser",
+  route: "user/deleteuser",
   handler: deleteUser,
 });

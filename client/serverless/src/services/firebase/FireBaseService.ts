@@ -58,6 +58,8 @@ class FirebaseService {
     this.initialize();
   }
 
+  /*--------------------------------------------*/
+
   public async initialize(): Promise<void | Error> {
     try {
       const firebaseConfig: FirebaseOptions =
@@ -113,6 +115,8 @@ class FirebaseService {
       return new Response(500, "FireBase Error While Authorizing ", error);
     }
   }
+
+  /*--------------------------------------------*/
 
   public async registerUser(userData: UserSchema): Promise<UserObject | Error> {
     try {
@@ -170,6 +174,52 @@ class FirebaseService {
     }
   }
 
+  public async logoutUser(): Promise<boolean | Error> {
+    try {
+      if (this.auth.currentUser) {
+        await this.auth.signOut();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async changeCurrentPassword(
+    newPassword: string
+  ): Promise<boolean | Error> {
+    try {
+      const changedPassword = await updatePassword(
+        this.auth.currentUser,
+        newPassword
+      );
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async sendResetPasswordEmail(email: string): Promise<boolean | Error> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  /*--------------------------------------------*/
+
+  public async getCurrentUser(): Promise<any> {
+    try {
+      return this.auth.currentUser;
+    } catch (error) {
+      return error;
+    }
+  }
+
   public async loginWithGoogle(): Promise<User | Error> {
     try {
       const provider = new GoogleAuthProvider();
@@ -184,39 +234,6 @@ class FirebaseService {
     }
   }
 
-  public async logoutUser(): Promise<boolean | Error> {
-    try {
-      if (this.auth.currentUser) {
-        await this.auth.signOut();
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      return error;
-    }
-  }
-
-  // public async changeCurrentPassword(
-  //   newPassword: string
-  // ): Promise<boolean | Error> {
-  //   try {
-  //     await updatePassword(this.auth.currentUser, newPassword);
-  //     return true;
-  //   } catch (error) {
-  //     return error;
-  //   }
-  // }
-
-  public async resetPassword(email: string): Promise<boolean | Error> {
-    try {
-      await sendPasswordResetEmail(this.auth, email);
-      return true;
-    } catch (error) {
-      return error;
-    }
-  }
-
   public async deleteUser(uid: string): Promise<boolean | Error> {
     try {
       await this.auth.currentUser.delete();
@@ -226,18 +243,22 @@ class FirebaseService {
       return error;
     }
   }
-  public async getCurrentUser(): Promise<any> {
-    return this.auth.currentUser;
 
-    // return await get(child(ref(this.database), `users/${user.uid}`))
-    //   .then((snapshot) => {
-    //     if (snapshot.exists()) {
-    //       return snapshot.val();
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     return error;
-    //   });
+  public async getCurrentUserFromDb(): Promise<any> {
+    try {
+      const uid = this.auth.currentUser.uid;
+      const userRef = ref(this.database, `users/${uid}`);
+      console.log("User Ref : ", userRef);
+      const userSnapshot = await get(userRef);
+
+      console.log("User Snapshot : ", userSnapshot);
+
+      console.log("User Snapshot Val : ", userSnapshot.val());
+
+      return userSnapshot.val();
+    } catch (error) {
+      return error;
+    }
   }
 }
 

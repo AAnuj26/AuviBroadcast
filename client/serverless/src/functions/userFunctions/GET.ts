@@ -5,8 +5,6 @@ import {
   InvocationContext,
 } from "@azure/functions";
 
-import Response from "../../utils/Response";
-
 import FirebaseService from "../../services/firebase/FireBaseService";
 
 const FireBase = new FirebaseService();
@@ -18,13 +16,20 @@ export async function getCurrentUser(
   return FireBase.authenticator(request, context, async () => {
     try {
       const user = await FireBase.getCurrentUser();
-      return new Response(200, "User Found", user);
+      return {
+        jsonBody: {
+          status: 200,
+          message: "User Found",
+          data: user,
+        },
+      };
     } catch (error) {
-      return new Response(
-        500,
-        "Internal Server Error While Deleting user",
-        error
-      );
+      return {
+        jsonBody: {
+          status: 500,
+          message: "Internal Server Error While Getting User",
+        },
+      };
     }
   });
 }

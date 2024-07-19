@@ -86,6 +86,13 @@ export async function publishAVideo(
 
       const user = await FireBase.getCurrentUser();
 
+      const video = data.get("video");
+      const thumbnail = data.get("thumbnail");
+
+      if (!video || !thumbnail) {
+        return new Response(400, "Video or Thumbnail Not Found", []);
+      }
+
       let videoUrl: string;
       let thumbnailUrl: string;
       for (const [key, value] of data.entries()) {
@@ -96,14 +103,16 @@ export async function publishAVideo(
               return Buffer.from(buffer);
             });
 
-            const uploadVideo = await Aws.uploadFile(VideoName, VideoData);
+            const uploadVideo = await Aws.uploadVideoFile(VideoName, VideoData);
 
-            videoUrl = uploadVideo.url;
+            videoUrl = `d12fmyv4yzixle.cloudfront.net/${VideoName}`;
           } else if (key === "thumbnail") {
             const ThumbnailName = `${key}-thumbnail-${Date.now()}-blob.jpg`;
             const ThumbnailData = await value.arrayBuffer().then((buffer) => {
               return Buffer.from(buffer);
             });
+
+            // const ThumbnailData = await value.arrayBuffer();
 
             const uploadThumbnail = await Cloudinary.uploadImageFromBuffer(
               ThumbnailName,

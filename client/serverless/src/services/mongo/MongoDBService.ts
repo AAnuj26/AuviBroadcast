@@ -18,11 +18,11 @@ class MongoService {
     this.video = this.client.db("auvi").collection("video");
   }
 
-  private async connect() {
+  async connect() {
     return await this.client.connect();
   }
 
-  private async close() {
+  async close() {
     return await this.client.close();
   }
 

@@ -2,10 +2,10 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
-  GetObjectCommand,
+  /*  GetObjectCommand,
   CreateMultipartUploadCommand,
   CompleteMultipartUploadCommand,
-  UploadPartCommand,
+  UploadPartCommand, */
 } from "@aws-sdk/client-s3";
 
 import { AzureKeyVaultService } from "../azure/AzureService";
@@ -31,20 +31,24 @@ class AwsService {
     }
   }
 
-  public async uploadFile(key, body) {
+  public async uploadVideoFile(key, body) {
     try {
-      return await this.s3Client.send(
+      const upload = await this.s3Client.send(
         new PutObjectCommand({
           Bucket: this.bucketName,
           Body: body,
           Key: key,
-          ContentType: "image/jpeg",
+          ContentType: "video/mp4",
         })
       );
+      // console.log("Upload -> \n", upload);
+      return upload;
     } catch (error) {
+      // console.log("Error uploading file to aws", error);
       return error;
     }
   }
+
   public async deleteFile(key) {
     try {
       return await this.s3Client.send(

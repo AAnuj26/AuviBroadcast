@@ -58,11 +58,13 @@ export async function updateVideo(
 
       for (const [key, value] of data.entries()) {
         if (value instanceof Blob) {
+          const ThumbnailName = `${key}-thumbnail-${Date.now()}-blob.jpg`;
           const buffer = await value.arrayBuffer().then((buffer) => {
             return Buffer.from(buffer);
           });
 
           const uploadThumbnail = await Cloudinary.uploadImageFromBuffer(
+            ThumbnailName,
             buffer
           );
           thumbnail = uploadThumbnail.url;

@@ -21,10 +21,22 @@ class Response {
         this.body = data.message;
       }
       // this.body = data ?data.code : null;
+      // if (data.code) {
+      //   this.jsonBody = {
+      //     status: status,
+      //     message: message,
+      //     error: data.code,
+      //   };
+      // } else {
+      //   this.jsonBody = {
+      //     status: status,
+      //     message: message,
+      //   };
+      // }
       this.jsonBody = {
         status: status,
         message: message,
-        error: data ? data.message : null,
+        error: data.code ? data.code : data.message,
       };
     }
   }
