@@ -1,15 +1,15 @@
-import {
-  app,
-  HttpRequest,
-  HttpResponseInit,
-  InvocationContext,
-} from "@azure/functions";
+// import {
+//   app,
+//   HttpRequest,
+//   HttpResponseInit,
+//   InvocationContext,
+// } from "@azure/functions";
 
-import Response from "../../utils/Response";
+// import Response from "../../utils/Response";
 
-import FirebaseService from "../../services/firebase/FireBaseService";
+// import FirebaseService from "../../services/firebase/FireBaseService";
 
-const FireBase = new FirebaseService();
+// const FireBase = new FirebaseService();
 
 // export async function getCurrentUser(
 //   request: HttpRequest,
